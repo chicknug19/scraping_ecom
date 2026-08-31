@@ -87,15 +87,29 @@ def scrape_shopee_playwright(product_url):
         page = context.new_page()
         page.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
         
-        extracted_data = {'api_info': None}
+        extracted_data = {'api_info': None, 'shop_name_api': None, 'api_data_full': {}}
 
+        # --- LOGIKA PENYADAP API ---
         def handle_response(response):
-            if "api/v4/item/get" in response.url or "api/v4/pdp/get_pc" in response.url:
+            if "api/v4" in response.url:
                 if response.status == 200:
                     try:
                         json_data = response.json()
-                        if 'data' in json_data:
-                            extracted_data['api_info'] = json_data['data'].get('item', json_data['data'])
+                        
+                        # 1. Menangkap dan menyimpan isi API Produk
+                        if "item/get" in response.url or "pdp/get_pc" in response.url:
+                            if 'data' in json_data:
+                                # SIMPAN VERSI UTUHNYA DI SINI SEBELUM DIPOTONG
+                                extracted_data['api_data_full'] = json_data['data']
+                                # Simpan versi potongannya untuk data item
+                                extracted_data['api_info'] = json_data['data'].get('item', json_data['data'])
+                        
+                        # 2. Menangkap API Toko (Tetap dipertahankan sebagai cadangan)
+                        if "shop" in response.url:
+                            if 'data' in json_data and 'name' in json_data['data']:
+                                extracted_data['shop_name_api'] = json_data['data']['name']
+                            elif 'data' in json_data and 'shop_name' in json_data['data']:
+                                extracted_data['shop_name_api'] = json_data['data']['shop_name']
                     except:
                         pass
 
@@ -106,7 +120,20 @@ def scrape_shopee_playwright(product_url):
         except Exception as e:
             pass 
 
-        time.sleep(6) 
+        # Logika tutup popup bahasa
+        try:
+            lang_btn = page.locator('button').filter(has_text="Bahasa Indonesia").first
+            if lang_btn.is_visible(timeout=3000):
+                lang_btn.click()
+                time.sleep(1)
+        except:
+            pass
+
+        print("Menggulir halaman produk untuk merender profil toko...")
+        page.mouse.wheel(0, 800)
+        time.sleep(3)
+        page.mouse.wheel(0, 500)
+        time.sleep(3)
 
         try:
             full_page_text = page.inner_text("body")
@@ -117,21 +144,34 @@ def scrape_shopee_playwright(product_url):
             match_sold = re.search(r'([\d.,]+[KMRB+]*)\s*\n?\s*(?:Sold|Terjual)', full_page_text, re.IGNORECASE)
             historical_sold = match_sold.group(1).upper() if match_sold else "0"
 
-            # Mengambil Nama Toko langsung dari elemen teks di halaman (biasanya tombol kunjungi toko)
-            shop_name = "Toko Tidak Ditemukan"
-            try:
-                # Mencoba mengambil teks dari elemen nama toko di panel penjual
-                shop_name = page.locator(".event-collapse ~ div ._3L-_54, .flex.items-center.f > div._3L-_54, .shop-name").first.inner_text(timeout=3000).strip()
-            except:
-                # Cadangan: ambil dari teks umum jika struktur berubah
-                pass
-
             if extracted_data['api_info']:
                 info = extracted_data['api_info']
+                full_data = extracted_data['api_data_full'] # Panggil data utuhnya
+                    
                 item_name = info.get('name') or info.get('title', 'Nama tidak ditemukan')
                 rating_star = info.get('item_rating', {}).get('rating_star', 0.0)
                 shop_location = info.get('shop_location', 'Lokasi tidak diketahui')
-                
+                    
+                # --- PENGAMBILAN NAMA TOKO YANG SUDAH DIPERBAIKI ---
+                shop_name = "Toko Tidak Ditemukan"
+                    
+                # 1. Prioritas Utama: Cari di data UTUH (tempat shop_detailed sebenarnya berada)
+                if 'shop_detailed' in full_data and 'name' in full_data['shop_detailed']:
+                    shop_name = full_data['shop_detailed']['name']
+                    # 2. Cadangan 1: Dari data info item (jika struktur berubah)
+                elif 'shop_detailed' in info and 'name' in info['shop_detailed']:
+                    shop_name = info['shop_detailed']['name']
+                    # 3. Cadangan 2: Dari tangkapan API khusus Toko
+                elif extracted_data['shop_name_api']:
+                    shop_name = extracted_data['shop_name_api']
+                # 4. Cadangan 3: Struktur lama
+                elif 'shop_basic' in info and 'name' in info['shop_basic']:
+                    shop_name = info['shop_basic']['name']
+                    
+                # HAPUS Opsi 4 (Pencarian CSS dari DOM) agar tidak pernah nyasar ke "Footer" lagi!
+                # ---------------------------------------------------------
+
+
                 image_hash = info.get('image', '')
                 image_url = f"https://cf.shopee.co.id/file/{image_hash}" if image_hash else ""
 
