@@ -6,14 +6,22 @@ from playwright.sync_api import sync_playwright
 import time
 
 # --- FUNGSI 1: MENCARI URL KOMPETITOR ---
-def get_competitor_urls(keyword, limit=10):
-    print(f"\n🔍 [FASE 1] Mencari {limit} URL untuk kata kunci: '{keyword}'...")
+# Tambahkan parameter location pada fungsi
+def get_competitor_urls(keyword, limit=10, location=""):
+    print(f"\n🔍 [FASE 1] Mencari {limit} URL untuk kata kunci: '{keyword}' (Lokasi: {location})...")
+    
     encoded_keyword = urllib.parse.quote(keyword)
     search_url = f"https://shopee.co.id/search?keyword={encoded_keyword}"
+    
+    # Jika lokasi dipilih, tambahkan parameter wilayah ke URL Shopee
+    if location:
+        encoded_location = urllib.parse.quote(location)
+        search_url += f"&locations={encoded_location}"
+        
     product_links = []
     
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
+        browser = p.chromium.launch(headless=True) 
         context = browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
             viewport={"width": 1920, "height": 1080}
@@ -22,9 +30,6 @@ def get_competitor_urls(keyword, limit=10):
         if os.path.exists("cookies.json"):
             with open("cookies.json", "r", encoding="utf-8") as f:
                 context.add_cookies([{"name": c.get("name"), "value": c.get("value"), "domain": c.get("domain"), "path": c.get("path", "/")} for c in json.load(f)])
-        else:
-            print("Error: cookies.json tidak ditemukan.")
-            return []
 
         page = context.new_page()
         page.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")

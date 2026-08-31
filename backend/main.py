@@ -6,6 +6,7 @@ import os
 import time
 from dotenv import load_dotenv
 from scraper_engine import get_competitor_urls, scrape_shopee_playwright
+from typing import Optional
 
 load_dotenv()
 app = FastAPI()
@@ -21,6 +22,7 @@ app.add_middleware(
 class ScrapeRequest(BaseModel):
     keyword: str
     limit: int = 10
+    location: Optional[str] = ""
 
 def save_to_database(data):
     try:
@@ -63,19 +65,17 @@ def save_to_database(data):
 
 @app.post("/api/scrape")
 def run_scraper(req: ScrapeRequest):
-    print(f"Menerima request dari frontend: {req.keyword} (Limit: {req.limit})")
+    print(f"Menerima request dari frontend: {req.keyword} (Limit: {req.limit}, Lokasi: {req.location})")
     
-    daftar_url = get_competitor_urls(keyword=req.keyword, limit=req.limit)
+    # Kirim parameter location ke fungsi get_competitor_urls
+    daftar_url = get_competitor_urls(keyword=req.keyword, limit=req.limit, location=req.location)
     semua_data = []
 
     for target_url in daftar_url:
         data_produk = scrape_shopee_playwright(target_url)
-        
         if data_produk:
             semua_data.append(data_produk)
-            # Jauh lebih rapi: kita cukup melempar 1 dictionary penuh ke fungsi DB
             save_to_database(data_produk)
-            
         time.sleep(2)
 
     return {"message": "Selesai", "results": semua_data}
