@@ -39,18 +39,24 @@ def scrape_shop_profile(username):
             viewport={"width": 1920, "height": 1080}
         )
         
-        # cookies_env = os.getenv("SHOPEE_COOKIES")
-        # if cookies_env:
-        #     try:
-        #         cookies_data = json.loads(cookies_env)
-        #         context.add_cookies([{"name": c.get("name"), "value": c.get("value"), "domain": c.get("domain"), "path": c.get("path", "/")} for c in cookies_data])
-        #     except Exception as e:
-        #         print("Error memuat kuki dari environment:", e)
-        # elif os.path.exists("cookies.json"):
-        #     with open("cookies.json", "r", encoding="utf-8") as f:
-        #         context.add_cookies([{"name": c.get("name"), "value": c.get("value"), "domain": c.get("domain"), "path": c.get("path", "/")} for c in json.load(f)])
-        # Berjalan sebagai Tamu (Guest Mode) tanpa kuki
-        print("Menjalankan Playwright dalam mode Guest (Tanpa Kuki)...")
+        # --- LOGIKA PEMUATAN KUKI AMAN ---
+        cookies_env = os.getenv("SHOPEE_COOKIES")
+        if cookies_env:
+            try:
+                cookies_data = json.loads(cookies_env)
+                context.add_cookies([{"name": c.get("name"), "value": c.get("value"), "domain": c.get("domain"), "path": c.get("path", "/")} for c in cookies_data])
+                print("✅ Kuki berhasil dimuat dari Environment Variable Azure!")
+            except Exception as e:
+                print("❌ Error memuat kuki dari environment:", e)
+        elif os.path.exists("cookies.json"):
+            try:
+                with open("cookies.json", "r", encoding="utf-8") as f:
+                    context.add_cookies([{"name": c.get("name"), "value": c.get("value"), "domain": c.get("domain"), "path": c.get("path", "/")} for c in json.load(f)])
+                print("✅ Kuki berhasil dimuat dari file lokal cookies.json!")
+            except Exception as e:
+                print("❌ Error membaca cookies.json:", e)
+        else:
+            print("⚠️ Peringatan: Tidak ada kuki yang ditemukan. Berjalan dalam mode Guest.")
         
         page = context.new_page()
         page.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
@@ -109,20 +115,24 @@ def get_competitor_urls(keyword, limit=10, location=""):
             viewport={"width": 1920, "height": 1080}
         )
         
-        # cookies_env = os.getenv("SHOPEE_COOKIES")
-        # if cookies_env:
-        #     try:
-        #         cookies_data = json.loads(cookies_env)
-        #         context.add_cookies([{"name": c.get("name"), "value": c.get("value"), "domain": c.get("domain"), "path": c.get("path", "/")} for c in cookies_data])
-        #     except Exception as e:
-        #         print("Error memuat kuki dari environment:", e)
-        # elif os.path.exists("cookies.json"):
-        #     with open("cookies.json", "r", encoding="utf-8") as f:
-        #         context.add_cookies([{"name": c.get("name"), "value": c.get("value"), "domain": c.get("domain"), "path": c.get("path", "/")} for c in json.load(f)])
-        # else:
-        #     print("Peringatan: Tidak ada kuki yang ditemukan.")
-        # Berjalan sebagai Tamu (Guest Mode) tanpa kuki
-        print("Menjalankan Playwright dalam mode Guest ngga ada cookie")
+        # --- LOGIKA PEMUATAN KUKI AMAN ---
+        cookies_env = os.getenv("SHOPEE_COOKIES")
+        if cookies_env:
+            try:
+                cookies_data = json.loads(cookies_env)
+                context.add_cookies([{"name": c.get("name"), "value": c.get("value"), "domain": c.get("domain"), "path": c.get("path", "/")} for c in cookies_data])
+                print("✅ Kuki berhasil dimuat dari Environment Variable Azure!")
+            except Exception as e:
+                print("❌ Error memuat kuki dari environment:", e)
+        elif os.path.exists("cookies.json"):
+            try:
+                with open("cookies.json", "r", encoding="utf-8") as f:
+                    context.add_cookies([{"name": c.get("name"), "value": c.get("value"), "domain": c.get("domain"), "path": c.get("path", "/")} for c in json.load(f)])
+                print("✅ Kuki berhasil dimuat dari file lokal cookies.json!")
+            except Exception as e:
+                print("❌ Error membaca cookies.json:", e)
+        else:
+            print("⚠️ Peringatan: Tidak ada kuki yang ditemukan. Berjalan dalam mode Guest.")
             
         page = context.new_page()
         page.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
@@ -175,20 +185,24 @@ def scrape_shopee_playwright(product_url):
             viewport={"width": 1920, "height": 1080}
         )
 
-        # cookies_env = os.getenv("SHOPEE_COOKIES")
-        # if cookies_env:
-        #     try:
-        #         cookies_data = json.loads(cookies_env)
-        #         context.add_cookies([{"name": c.get("name"), "value": c.get("value"), "domain": c.get("domain"), "path": c.get("path", "/")} for c in cookies_data])
-        #     except Exception as e:
-        #         print("Error memuat kuki dari environment:", e)
-        # elif os.path.exists("cookies.json"):
-        #     with open("cookies.json", "r", encoding="utf-8") as f:
-        #         context.add_cookies([{"name": c.get("name"), "value": c.get("value"), "domain": c.get("domain"), "path": c.get("path", "/")} for c in json.load(f)])
-        # else:
-        #     print("Peringatan: Tidak ada kuki yang ditemukan, mungkin akan diblokir oleh sistem.")
-        # Berjalan sebagai Tamu (Guest Mode) tanpa kuki
-        print("Menjalankan Playwright dalam mode Guest (Tanpa Kuki)...")
+        # --- LOGIKA PEMUATAN KUKI AMAN ---
+        cookies_env = os.getenv("SHOPEE_COOKIES")
+        if cookies_env:
+            try:
+                cookies_data = json.loads(cookies_env)
+                context.add_cookies([{"name": c.get("name"), "value": c.get("value"), "domain": c.get("domain"), "path": c.get("path", "/")} for c in cookies_data])
+                print("✅ Kuki berhasil dimuat dari Environment Variable Azure!")
+            except Exception as e:
+                print("❌ Error memuat kuki dari environment:", e)
+        elif os.path.exists("cookies.json"):
+            try:
+                with open("cookies.json", "r", encoding="utf-8") as f:
+                    context.add_cookies([{"name": c.get("name"), "value": c.get("value"), "domain": c.get("domain"), "path": c.get("path", "/")} for c in json.load(f)])
+                print("✅ Kuki berhasil dimuat dari file lokal cookies.json!")
+            except Exception as e:
+                print("❌ Error membaca cookies.json:", e)
+        else:
+            print("⚠️ Peringatan: Tidak ada kuki yang ditemukan. Berjalan dalam mode Guest.")
 
         page = context.new_page()
         page.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
