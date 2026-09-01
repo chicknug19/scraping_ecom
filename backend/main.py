@@ -119,17 +119,56 @@ def save_to_database(data):
         conn = pyodbc.connect(conn_str)
         cursor = conn.cursor()
 
-        # Menggunakan OUTPUT INSERTED.ItemCode untuk langsung menangkap ID yang baru dibuat
-        query_item = """
-            INSERT INTO Items (ItemName, ShopName, Location, RatingStar, TotalRatings, TotalSold, ImageURL, SourceURL)
-            OUTPUT INSERTED.ItemCode
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """
-        cursor.execute(query_item, data['item_name'], data['shop_name'], data['location'], data['rating_star'], data['total_ratings'], data['sold'], data['image_url'], data['source_url'])
-        
-        row = cursor.fetchone()
-        generated_item_code = int(row[0]) if row and row[0] is not None else None
+        # ---------------------------------------------------------
+        # TAHAP 1: CARI ATAU BUAT PROFIL TOKO (UPSERT STORES)
+        # ---------------------------------------------------------
+        cursor.execute("SELECT StoreID FROM Stores WHERE ShopName = ?", data['shop_name'])
+        store_row = cursor.fetchone()
 
+        if store_row:
+            store_id = store_row[0]
+        else:
+            # Jika toko belum ada, kita buat profil dasar
+            # Username dibuat dari nama toko tanpa spasi sebagai fallback
+            fake_username = data['shop_name'].replace(" ", "").lower()[:50]
+            cursor.execute("""
+                INSERT INTO Stores (Username, ShopName) 
+                OUTPUT INSERTED.StoreID 
+                VALUES (?, ?)
+            """, fake_username, data['shop_name'])
+            store_id = cursor.fetchone()[0]
+
+        # ---------------------------------------------------------
+        # TAHAP 2: UPSERT DATA PRODUK (ITEMS)
+        # ---------------------------------------------------------
+        # Cek apakah produk ini dari toko ini sudah ada di database
+        cursor.execute("SELECT ItemCode FROM Items WHERE ItemName = ? AND StoreID = ?", data['item_name'], store_id)
+        item_row = cursor.fetchone()
+
+        if item_row:
+            # JIKA ADA: Cukup perbarui angka penjualan dan rating terbaru
+            generated_item_code = item_row[0]
+            cursor.execute("""
+                UPDATE Items 
+                SET TotalRatings = ?, TotalSold = ?, RatingStar = ?, ImageURL = ?, Location = ?
+                WHERE ItemCode = ?
+            """, data['total_ratings'], data['sold'], data['rating_star'], data['image_url'], data['location'], generated_item_code)
+            
+            # Bersihkan varian lama agar bisa diganti dengan harga hari ini
+            cursor.execute("DELETE FROM ItemVariants WHERE ItemCode = ?", generated_item_code)
+        else:
+            # JIKA BELUM ADA: Masukkan sebagai produk baru
+            # Pastikan tabel Items milikmu sudah memiliki kolom StoreID dan membuang kolom ShopName
+            cursor.execute("""
+                INSERT INTO Items (ItemName, StoreID, Location, RatingStar, TotalRatings, TotalSold, ImageURL, SourceURL)
+                OUTPUT INSERTED.ItemCode
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """, data['item_name'], store_id, data['location'], data['rating_star'], data['total_ratings'], data['sold'], data['image_url'], data['source_url'])
+            generated_item_code = cursor.fetchone()[0]
+
+        # ---------------------------------------------------------
+        # TAHAP 3: INSERT VARIAN & HARGA TERBARU
+        # ---------------------------------------------------------
         if generated_item_code and data['variants']:
             query_variant = """
                 INSERT INTO ItemVariants (ItemCode, VariantName, Price)
@@ -140,9 +179,9 @@ def save_to_database(data):
 
         conn.commit()
         conn.close()
-        print(f"    [DB] Berhasil menyimpan item ID: {generated_item_code} dengan {len(data['variants'])} varian.")
+        print(f"✅ [DB] Sukses upsert item ID {generated_item_code} untuk Toko {store_id}")
     except Exception as e:
-        print(f"Error DB: {e}")
+        print(f"❌ Error DB: {e}")
 
 
 
