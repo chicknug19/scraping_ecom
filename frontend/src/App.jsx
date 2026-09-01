@@ -23,7 +23,8 @@ export default function App() {
     setScrapedData([]);
 
     try {
-        const response = await fetch('http://localhost:8000/api/scrape', {
+      const response = await fetch('https://scraper-radi.azurewebsites.net/api/scrape', {
+        // const response = await fetch('http://localhost:8000/api/scrape', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
