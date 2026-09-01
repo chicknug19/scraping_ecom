@@ -6,14 +6,12 @@ from playwright.sync_api import sync_playwright
 import time
 
 # --- FUNGSI 1: MENCARI URL KOMPETITOR ---
-# Tambahkan parameter location pada fungsi
 def get_competitor_urls(keyword, limit=10, location=""):
     print(f"\n🔍 [FASE 1] Mencari {limit} URL untuk kata kunci: '{keyword}' (Lokasi: {location})...")
     
     encoded_keyword = urllib.parse.quote(keyword)
     search_url = f"https://shopee.co.id/search?keyword={encoded_keyword}"
     
-    # Jika lokasi dipilih, tambahkan parameter wilayah ke URL Shopee
     if location:
         encoded_location = urllib.parse.quote(location)
         search_url += f"&locations={encoded_location}"
@@ -27,10 +25,20 @@ def get_competitor_urls(keyword, limit=10, location=""):
             viewport={"width": 1920, "height": 1080}
         )
         
-        if os.path.exists("cookies.json"):
+        # --- LOGIKA PEMUATAN KUKI AMAN ---
+        cookies_env = os.getenv("SHOPEE_COOKIES")
+        if cookies_env:
+            try:
+                cookies_data = json.loads(cookies_env)
+                context.add_cookies([{"name": c.get("name"), "value": c.get("value"), "domain": c.get("domain"), "path": c.get("path", "/")} for c in cookies_data])
+            except Exception as e:
+                print("Error memuat kuki dari environment:", e)
+        elif os.path.exists("cookies.json"):
             with open("cookies.json", "r", encoding="utf-8") as f:
                 context.add_cookies([{"name": c.get("name"), "value": c.get("value"), "domain": c.get("domain"), "path": c.get("path", "/")} for c in json.load(f)])
-
+        else:
+            print("Peringatan: Tidak ada kuki yang ditemukan.")
+            
         page = context.new_page()
         page.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
 
@@ -39,24 +47,32 @@ def get_competitor_urls(keyword, limit=10, location=""):
         except Exception as e:
             print(f"Info navigasi search: {e}")
 
+        # --- PERBAIKAN 1: KEMBALI KE SELEKTOR AMAN ---
         print("Menunggu elemen produk dimuat di halaman pencarian...")
         try:
             page.locator("a[href*='-i.']").first.wait_for(timeout=15000)
         except:
             time.sleep(5)
 
-        print("Menggulir halaman untuk memuat produk...")
-        for _ in range(4):
-            page.mouse.wheel(0, 1000)
-            time.sleep(2)
+        # --- PERBAIKAN 2: SCROLL DINAMIS BERDASARKAN LIMIT ---
+        # Rumus pintar: Butuh lebih banyak scroll jika limitnya besar
+        scroll_attempts = (limit // 10) + 3 
+        print(f"Menggulir halaman {scroll_attempts} kali untuk memuat {limit} produk...")
         
+        for _ in range(scroll_attempts):
+            page.mouse.wheel(0, 1500)
+            time.sleep(1.5) # Beri jeda agar gambar dan link sempat dirender
+        
+        # --- PERBAIKAN 3: EKSTRAKSI LINK ---
         try:
+            # Gunakan kembali selektor bawaan yang tidak mudah rusak
             elements = page.locator("a[href*='-i.']").element_handles()
             for el in elements:
                 href = el.get_attribute("href")
                 if href:
                     clean_url = ("https://shopee.co.id" + href).split("?")[0]
-                    if clean_url not in product_links:
+                    # Filter dasar: Pastikan URL tidak mengandung kata iklan yang terlalu jelas
+                    if clean_url not in product_links and "ads" not in clean_url.lower():
                         product_links.append(clean_url)
                     if len(product_links) >= limit:
                         break
@@ -80,9 +96,21 @@ def scrape_shopee_playwright(product_url):
             viewport={"width": 1920, "height": 1080}
         )
 
-        if os.path.exists("cookies.json"):
+        # --- LOGIKA PEMUATAN KUKI AMAN ---
+        cookies_env = os.getenv("SHOPEE_COOKIES")
+        if cookies_env:
+            # Berjalan di Cloud (Hugging Face) membaca dari rahasia/Environment Variable
+            try:
+                cookies_data = json.loads(cookies_env)
+                context.add_cookies([{"name": c.get("name"), "value": c.get("value"), "domain": c.get("domain"), "path": c.get("path", "/")} for c in cookies_data])
+            except Exception as e:
+                print("Error memuat kuki dari environment:", e)
+        elif os.path.exists("cookies.json"):
+            # Fallback jika dijalankan di komputer lokal
             with open("cookies.json", "r", encoding="utf-8") as f:
                 context.add_cookies([{"name": c.get("name"), "value": c.get("value"), "domain": c.get("domain"), "path": c.get("path", "/")} for c in json.load(f)])
+        else:
+            print("Peringatan: Tidak ada kuki yang ditemukan, mungkin akan diblokir oleh sistem.")
 
         page = context.new_page()
         page.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
@@ -138,12 +166,14 @@ def scrape_shopee_playwright(product_url):
         try:
             full_page_text = page.inner_text("body")
             
-            match_ratings = re.search(r'([\d.,]+[KMRB+]*)\s*\n?\s*(?:Ratings|Penilaian)', full_page_text, re.IGNORECASE)
+            # TAMBAHKAN J dan T DI DALAM KURUNG SIKU!
+            match_ratings = re.search(r'([\d.,]+[KMRBJTm+]*)\s*\n?\s*(?:Ratings|Penilaian)', full_page_text, re.IGNORECASE)
             total_ratings = match_ratings.group(1) if match_ratings else "0"
 
-            match_sold = re.search(r'([\d.,]+[KMRB+]*)\s*\n?\s*(?:Sold|Terjual)', full_page_text, re.IGNORECASE)
+            match_sold = re.search(r'([\d.,]+[KMRBJT+]*)\s*\n?\s*(?:Sold|Terjual)', full_page_text, re.IGNORECASE)
             historical_sold = match_sold.group(1).upper() if match_sold else "0"
-
+            
+            
             if extracted_data['api_info']:
                 info = extracted_data['api_info']
                 full_data = extracted_data['api_data_full'] # Panggil data utuhnya
@@ -178,8 +208,14 @@ def scrape_shopee_playwright(product_url):
                 models = info.get('models', [])
                 parsed_variants = []
                 for model in models:
+                    v_name = model.get('name')
+                    
+                    # Cek jika namanya kosong, None, atau hanya berisi spasi
+                    if not v_name or v_name.strip() == "":
+                        v_name = "Default"
+                        
                     parsed_variants.append({
-                        "variant_name": model.get('name'),
+                        "variant_name": v_name,
                         "price": model.get('price') / 100000
                     })
                 

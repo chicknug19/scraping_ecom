@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+playwright
+pyodbc
+python-dotenv
+google-genai

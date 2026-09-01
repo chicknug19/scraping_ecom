@@ -1,0 +1,28 @@
+name: Deploy Backend to Hugging Face Spaces
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/**' 
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Push to Hugging Face
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          cd backend
+          git init
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add .
+          git commit -m "Auto-deploy dari GitHub Actions"
+          # GANTI tulisan USERNAME_HF dan NAMA_SPACE di bawah ini sesuai milikmu!
+          git push --force https://USERNAME_HF:$HF_TOKEN@huggingface.co/spaces/USERNAME_HF/NAMA_SPACE master:main
