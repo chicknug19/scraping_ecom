@@ -256,6 +256,11 @@ def scrape_shopee_playwright(product_url):
             match_sold = re.search(r'([\d.,]+[KMRBJT+]*)\s*\n?\s*(?:Sold|Terjual)', full_page_text, re.IGNORECASE)
             historical_sold = match_sold.group(1).upper() if match_sold else "0"
             
+            # --- LOGIKA BARU: MENANGKAP NIB ---
+            match_nib = re.search(r'NIB:\s*([0-9*]+)', full_page_text, re.IGNORECASE)
+            nib_value = match_nib.group(1) if match_nib else "Tidak Ada NIB"
+            # -----------------------------------
+            
             if extracted_data['api_info']:
                 info = extracted_data['api_info']
                 full_data = extracted_data['api_data_full'] 
@@ -298,8 +303,15 @@ def scrape_shopee_playwright(product_url):
                     "image_url": image_url,
                     "location": shop_location,
                     "variants": parsed_variants,
-                    "source_url": product_url
+                    "source_url": product_url,
+                    "nib": nib_value # Masukkan NIB ke dalam data produk
                 }
+
+                # --- KODE UNTUK DUMP JSON (UNTUK DEBUGGING) ---
+                with open("debug_api_product.json", "w", encoding="utf-8") as f:
+                    json.dump(extracted_data, f, indent=4, ensure_ascii=False)
+                # ----------------------------------------------
+
         except Exception as e:
             print(f"Error saat mengekstrak teks produk: {e}")
         finally:
