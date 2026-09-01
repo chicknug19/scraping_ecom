@@ -1,13 +1,21 @@
 import React, { useState } from 'react';
+import ReactMarkdown from 'react-markdown';
 import './App.css';
 
 export default function App() {
+  // --- STATE UNTUK SCRAPING ---
   const [keyword, setKeyword] = useState('');
   const [limit, setLimit] = useState(10);
-  const [location, setLocation] = useState(''); // State baru untuk lokasi
+  const [location, setLocation] = useState(''); 
   const [loading, setLoading] = useState(false);
   const [scrapedData, setScrapedData] = useState([]);
 
+  // --- STATE UNTUK AI CHAT ---
+  const [prompt, setPrompt] = useState('');
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiResponse, setAiResponse] = useState('');
+
+  // --- FUNGSI SCRAPING ---
   const handleScrape = async () => {
     if (!keyword) return alert("Masukkan keyword terlebih dahulu!");
     
@@ -21,7 +29,7 @@ export default function App() {
             body: JSON.stringify({ 
                 keyword, 
                 limit: parseInt(limit),
-                location // Mengirim pilihan lokasi ke backend
+                location 
             })
         });
         
@@ -37,12 +45,43 @@ export default function App() {
     setLoading(false);
   };
 
+  // --- FUNGSI AI CHAT ---
+  const handleTemplateClick = (templateText) => {
+    setPrompt(templateText);
+  };
+
+  const handleChatAI = async () => {
+    if (!prompt) return alert("Ketikkan instruksi untuk AI terlebih dahulu!");
+    
+    setAiLoading(true);
+    setAiResponse(''); 
+
+    try {
+        const response = await fetch('http://localhost:8000/api/analyze', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_prompt: prompt })
+        });
+        
+        const data = await response.json();
+        if (data.ai_response) {
+            setAiResponse(data.ai_response);
+        } else if (data.error) {
+            setAiResponse(`Error: ${data.error}`);
+        }
+    } catch (error) {
+        console.error("Terjadi kesalahan AI:", error);
+        setAiResponse("Gagal terhubung ke layanan AI.");
+    }
+    setAiLoading(false);
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 p-8 font-sans">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl mx-auto space-y-8">
         
-        {/* PANEL KONTROL */}
-        <div className="bg-white p-6 rounded-lg shadow-md mb-8">
+        {/* ================= PANEL KONTROL SCRAPING ================= */}
+        <div className="bg-white p-6 rounded-lg shadow-md border-t-4 border-orange-500">
           <h1 className="text-3xl font-bold mb-6 text-orange-500">Shopee Scraper Dashboard</h1>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -63,7 +102,7 @@ export default function App() {
                 value={limit}
                 onChange={(e) => setLimit(e.target.value)}
                 className="w-full border border-gray-300 rounded-md p-3 focus:ring-2 focus:ring-orange-500 outline-none"
-                min="1" max="20"
+                min="1" max="50"
               />
             </div>
             <div>
@@ -92,10 +131,78 @@ export default function App() {
           </button>
         </div>
 
-        {/* PANEL HASIL SCRAPING */}
+        {/* ================= PANEL AI ASSISTANT ================= */}
+        <div className="bg-white p-6 rounded-lg shadow-md border-t-4 border-blue-500">
+          <h2 className="text-2xl font-bold mb-4 text-blue-600">🤖 Konsultan Harga AI</h2>
+          
+          <div className="mb-4">
+            <p className="text-sm font-semibold text-gray-600 mb-2">Pilih Template Cepat:</p>
+            <div className="flex flex-wrap gap-2">
+              <button 
+                onClick={() => handleTemplateClick("Berperanlah sebagai konsultan bisnis. Tolong cari data 'iphone 17' di database maksimal 20 data. Berikan saran harga jual yang bagus untuk menghadapi Mega Sale bulan depan.")}
+                className="bg-blue-50 text-blue-700 text-xs font-medium px-3 py-2 rounded border border-blue-200 hover:bg-blue-100 transition"
+              >
+                Template 1: Strategi Mega Sale
+              </button>
+              <button 
+                onClick={() => handleTemplateClick("Tolong cari data 'iphone 17' maksimal 30 data dari database. Buatkan ringkasan tren harga terendah, rata-rata, dan tertinggi dari berbagai lokasi.")}
+                className="bg-purple-50 text-purple-700 text-xs font-medium px-3 py-2 rounded border border-purple-200 hover:bg-purple-100 transition"
+              >
+                Template 2: Tren Harga Lokasi
+              </button>
+              <button 
+                onClick={() => handleTemplateClick("Cari data kompetitor untuk 'iphone 17' maksimal 50 data di database. Apakah ada outlier (harga yang terlalu murah/mahal yang tidak masuk akal)?")}
+                className="bg-green-50 text-green-700 text-xs font-medium px-3 py-2 rounded border border-green-200 hover:bg-green-100 transition"
+              >
+                Template 3: Deteksi Outlier Harga
+              </button>
+            </div>
+          </div>
+
+          <textarea
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            rows="3"
+            className="w-full border border-gray-300 rounded-md p-3 focus:ring-2 focus:ring-blue-500 outline-none mb-4 resize-y text-sm"
+            placeholder="Ketik instruksi atau pertanyaan untuk AI di sini..."
+          ></textarea>
+
+          <button 
+            onClick={handleChatAI}
+            disabled={aiLoading}
+            className={`w-full text-white font-bold py-3 px-4 rounded-md transition-colors ${aiLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'}`}
+          >
+            {aiLoading ? 'AI Sedang Membaca Database & Menganalisis...' : 'Kirim ke AI'}
+          </button>
+
+          {aiResponse && (
+            <div className="mt-6 bg-gray-50 border border-gray-200 rounded-lg p-6">
+              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4 border-b pb-2">Hasil Analisis Gemini</h3>
+              <div className="text-gray-800 text-sm leading-relaxed">
+                {/* Pembaca Markdown dengan Styling Tailwind Kustom */}
+                <ReactMarkdown
+                  components={{
+                    h1: ({node, ...props}) => <h1 className="text-xl font-bold mt-4 mb-2 text-blue-800" {...props} />,
+                    h2: ({node, ...props}) => <h2 className="text-lg font-bold mt-4 mb-2 text-blue-700" {...props} />,
+                    h3: ({node, ...props}) => <h3 className="text-md font-bold mt-3 mb-1 text-gray-800" {...props} />,
+                    p: ({node, ...props}) => <p className="mb-3" {...props} />,
+                    ul: ({node, ...props}) => <ul className="list-disc pl-6 mb-3 space-y-1" {...props} />,
+                    ol: ({node, ...props}) => <ol className="list-decimal pl-6 mb-3 space-y-1" {...props} />,
+                    li: ({node, ...props}) => <li className="" {...props} />,
+                    strong: ({node, ...props}) => <strong className="font-semibold text-gray-900" {...props} />,
+                  }}
+                >
+                  {aiResponse}
+                </ReactMarkdown>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ================= PANEL HASIL SCRAPING ================= */}
         {scrapedData.length > 0 && (
           <div className="space-y-6">
-            <h2 className="text-xl font-bold text-gray-800">Hasil Scraping ({scrapedData.length} Produk)</h2>
+            <h2 className="text-xl font-bold text-gray-800 border-l-4 border-orange-500 pl-3">Daftar Produk Scraped ({scrapedData.length})</h2>
             
             {scrapedData.map((item, idx) => (
               <div key={idx} className="bg-white p-5 rounded-lg shadow border border-gray-200 flex flex-col md:flex-row gap-6 hover:shadow-lg transition-shadow">
