@@ -10,7 +10,6 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    environment: production # Tambahkan baris ini! (Sesuaikan dengan nama environment di GitHub-mu)
     permissions:
       packages: write
       contents: read
