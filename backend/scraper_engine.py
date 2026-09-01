@@ -5,91 +5,7 @@ import urllib.parse
 from playwright.sync_api import sync_playwright
 import time
 
-# --- FUNGSI UTILITAS ---
-def parse_shopee_metric(text_value):
-    """
-    Mengubah teks seperti '7,7m', '10RB', '1.5k' menjadi integer murni.
-    """
-    if not text_value:
-        return 0
-        
-    text_clean = text_value.lower().strip().replace(',', '.')
-    match = re.search(r'([\d.]+)\s*([a-z]*)', text_clean)
-    if match:
-        number = float(match.group(1))
-        suffix = match.group(2)
-        
-        if suffix in ['m', 'jt', 'juta']:
-            return int(number * 1000000)
-        elif suffix in ['k', 'rb', 'ribu']:
-            return int(number * 1000)
-        return int(number)
-    return 0
-
-# --- FUNGSI 1: MATA-MATA PROFIL TOKO KOMPETITOR ---
-def scrape_shop_profile(username):
-    print(f"\n🕵️ [MATA-MATA TOKO] Memeriksa profil: {username}...")
-    shop_url = f"https://shopee.co.id/{username}"
-    shop_data = None
-    
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True) 
-        context = browser.new_context(
-            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-            viewport={"width": 1920, "height": 1080}
-        )
-        
-        # cookies_env = os.getenv("SHOPEE_COOKIES")
-        # if cookies_env:
-        #     try:
-        #         cookies_data = json.loads(cookies_env)
-        #         context.add_cookies([{"name": c.get("name"), "value": c.get("value"), "domain": c.get("domain"), "path": c.get("path", "/")} for c in cookies_data])
-        #     except Exception as e:
-        #         print("Error memuat kuki dari environment:", e)
-        # elif os.path.exists("cookies.json"):
-        #     with open("cookies.json", "r", encoding="utf-8") as f:
-        #         context.add_cookies([{"name": c.get("name"), "value": c.get("value"), "domain": c.get("domain"), "path": c.get("path", "/")} for c in json.load(f)])
-        # Berjalan sebagai Tamu (Guest Mode) tanpa kuki
-        print("Menjalankan Playwright dalam mode Guest (Tanpa Kuki)...")
-        
-        page = context.new_page()
-        page.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
-
-        try:
-            page.goto(shop_url, timeout=45000, wait_until="commit")
-            
-            try:
-                page.locator("h1.section-seller-overview-horizontal__portrait-name").wait_for(timeout=10000)
-            except:
-                print(f"❌ Toko '{username}' tidak ditemukan atau salah ejaan!")
-                return {"error": f"Toko '{username}' tidak ditemukan. Cek ejaan username."}
-
-            shop_name_text = page.locator("h1.section-seller-overview-horizontal__portrait-name").inner_text()
-            full_text = page.inner_text("body")
-            
-            followers_match = re.search(r'Pengikut\s*\n?\s*([\d.,]+[KMRBJTm+]*)|Followers\s*\n?\s*([\d.,]+[KMRBJTm+]*)', full_text, re.IGNORECASE)
-            products_match = re.search(r'Produk\s*\n?\s*([\d.,]+)|Products\s*\n?\s*([\d.,]+)', full_text, re.IGNORECASE)
-            
-            followers_raw = followers_match.group(1) or followers_match.group(2) if followers_match else "0"
-            products_raw = products_match.group(1) or products_match.group(2) if products_match else "0"
-            
-            shop_data = {
-                "username": username,
-                "shop_name": shop_name_text.strip(),
-                "followers": parse_shopee_metric(followers_raw),
-                "total_products": parse_shopee_metric(products_raw)
-            }
-            print(f"📊 Hasil: {shop_data['shop_name']} | {shop_data['followers']} Followers | {shop_data['total_products']} Produk")
-            
-        except Exception as e:
-            print(f"Error saat scan profil toko: {e}")
-            return {"error": str(e)}
-        finally:
-            browser.close()
-            
-    return shop_data
-
-# --- FUNGSI 2: MENCARI URL KOMPETITOR ---
+# --- FUNGSI 1: MENCARI URL KOMPETITOR ---
 def get_competitor_urls(keyword, limit=10, location=""):
     print(f"\n🔍 [FASE 1] Mencari {limit} URL untuk kata kunci: '{keyword}' (Lokasi: {location})...")
     
@@ -109,20 +25,19 @@ def get_competitor_urls(keyword, limit=10, location=""):
             viewport={"width": 1920, "height": 1080}
         )
         
-        # cookies_env = os.getenv("SHOPEE_COOKIES")
-        # if cookies_env:
-        #     try:
-        #         cookies_data = json.loads(cookies_env)
-        #         context.add_cookies([{"name": c.get("name"), "value": c.get("value"), "domain": c.get("domain"), "path": c.get("path", "/")} for c in cookies_data])
-        #     except Exception as e:
-        #         print("Error memuat kuki dari environment:", e)
-        # elif os.path.exists("cookies.json"):
-        #     with open("cookies.json", "r", encoding="utf-8") as f:
-        #         context.add_cookies([{"name": c.get("name"), "value": c.get("value"), "domain": c.get("domain"), "path": c.get("path", "/")} for c in json.load(f)])
-        # else:
-        #     print("Peringatan: Tidak ada kuki yang ditemukan.")
-        # Berjalan sebagai Tamu (Guest Mode) tanpa kuki
-        print("Menjalankan Playwright dalam mode Guest ngga ada cookie")
+        # --- LOGIKA PEMUATAN KUKI AMAN ---
+        cookies_env = os.getenv("SHOPEE_COOKIES")
+        if cookies_env:
+            try:
+                cookies_data = json.loads(cookies_env)
+                context.add_cookies([{"name": c.get("name"), "value": c.get("value"), "domain": c.get("domain"), "path": c.get("path", "/")} for c in cookies_data])
+            except Exception as e:
+                print("Error memuat kuki dari environment:", e)
+        elif os.path.exists("cookies.json"):
+            with open("cookies.json", "r", encoding="utf-8") as f:
+                context.add_cookies([{"name": c.get("name"), "value": c.get("value"), "domain": c.get("domain"), "path": c.get("path", "/")} for c in json.load(f)])
+        else:
+            print("Peringatan: Tidak ada kuki yang ditemukan.")
             
         page = context.new_page()
         page.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
@@ -132,25 +47,31 @@ def get_competitor_urls(keyword, limit=10, location=""):
         except Exception as e:
             print(f"Info navigasi search: {e}")
 
+        # --- PERBAIKAN 1: KEMBALI KE SELEKTOR AMAN ---
         print("Menunggu elemen produk dimuat di halaman pencarian...")
         try:
             page.locator("a[href*='-i.']").first.wait_for(timeout=15000)
         except:
             time.sleep(5)
 
+        # --- PERBAIKAN 2: SCROLL DINAMIS BERDASARKAN LIMIT ---
+        # Rumus pintar: Butuh lebih banyak scroll jika limitnya besar
         scroll_attempts = (limit // 10) + 3 
         print(f"Menggulir halaman {scroll_attempts} kali untuk memuat {limit} produk...")
         
         for _ in range(scroll_attempts):
             page.mouse.wheel(0, 1500)
-            time.sleep(1.5)
+            time.sleep(1.5) # Beri jeda agar gambar dan link sempat dirender
         
+        # --- PERBAIKAN 3: EKSTRAKSI LINK ---
         try:
+            # Gunakan kembali selektor bawaan yang tidak mudah rusak
             elements = page.locator("a[href*='-i.']").element_handles()
             for el in elements:
                 href = el.get_attribute("href")
                 if href:
                     clean_url = ("https://shopee.co.id" + href).split("?")[0]
+                    # Filter dasar: Pastikan URL tidak mengandung kata iklan yang terlalu jelas
                     if clean_url not in product_links and "ads" not in clean_url.lower():
                         product_links.append(clean_url)
                     if len(product_links) >= limit:
@@ -163,7 +84,7 @@ def get_competitor_urls(keyword, limit=10, location=""):
     print(f"✅ Ditemukan {len(product_links)} link target.")
     return product_links
 
-# --- FUNGSI 3: MENARIK DATA PRODUK ---
+# --- FUNGSI 2: MENARIK DATA PRODUK ---
 def scrape_shopee_playwright(product_url):
     print(f"Mengakses: {product_url}")
     result_data = None 
@@ -175,35 +96,43 @@ def scrape_shopee_playwright(product_url):
             viewport={"width": 1920, "height": 1080}
         )
 
-        # cookies_env = os.getenv("SHOPEE_COOKIES")
-        # if cookies_env:
-        #     try:
-        #         cookies_data = json.loads(cookies_env)
-        #         context.add_cookies([{"name": c.get("name"), "value": c.get("value"), "domain": c.get("domain"), "path": c.get("path", "/")} for c in cookies_data])
-        #     except Exception as e:
-        #         print("Error memuat kuki dari environment:", e)
-        # elif os.path.exists("cookies.json"):
-        #     with open("cookies.json", "r", encoding="utf-8") as f:
-        #         context.add_cookies([{"name": c.get("name"), "value": c.get("value"), "domain": c.get("domain"), "path": c.get("path", "/")} for c in json.load(f)])
-        # else:
-        #     print("Peringatan: Tidak ada kuki yang ditemukan, mungkin akan diblokir oleh sistem.")
-        # Berjalan sebagai Tamu (Guest Mode) tanpa kuki
-        print("Menjalankan Playwright dalam mode Guest (Tanpa Kuki)...")
+        # --- LOGIKA PEMUATAN KUKI AMAN ---
+        cookies_env = os.getenv("SHOPEE_COOKIES")
+        if cookies_env:
+            # Berjalan di Cloud (Hugging Face) membaca dari rahasia/Environment Variable
+            try:
+                cookies_data = json.loads(cookies_env)
+                context.add_cookies([{"name": c.get("name"), "value": c.get("value"), "domain": c.get("domain"), "path": c.get("path", "/")} for c in cookies_data])
+            except Exception as e:
+                print("Error memuat kuki dari environment:", e)
+        elif os.path.exists("cookies.json"):
+            # Fallback jika dijalankan di komputer lokal
+            with open("cookies.json", "r", encoding="utf-8") as f:
+                context.add_cookies([{"name": c.get("name"), "value": c.get("value"), "domain": c.get("domain"), "path": c.get("path", "/")} for c in json.load(f)])
+        else:
+            print("Peringatan: Tidak ada kuki yang ditemukan, mungkin akan diblokir oleh sistem.")
 
         page = context.new_page()
         page.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
         
         extracted_data = {'api_info': None, 'shop_name_api': None, 'api_data_full': {}}
 
+        # --- LOGIKA PENYADAP API ---
         def handle_response(response):
             if "api/v4" in response.url:
                 if response.status == 200:
                     try:
                         json_data = response.json()
+                        
+                        # 1. Menangkap dan menyimpan isi API Produk
                         if "item/get" in response.url or "pdp/get_pc" in response.url:
                             if 'data' in json_data:
+                                # SIMPAN VERSI UTUHNYA DI SINI SEBELUM DIPOTONG
                                 extracted_data['api_data_full'] = json_data['data']
+                                # Simpan versi potongannya untuk data item
                                 extracted_data['api_info'] = json_data['data'].get('item', json_data['data'])
+                        
+                        # 2. Menangkap API Toko (Tetap dipertahankan sebagai cadangan)
                         if "shop" in response.url:
                             if 'data' in json_data and 'name' in json_data['data']:
                                 extracted_data['shop_name_api'] = json_data['data']['name']
@@ -219,6 +148,7 @@ def scrape_shopee_playwright(product_url):
         except Exception as e:
             pass 
 
+        # Logika tutup popup bahasa
         try:
             lang_btn = page.locator('button').filter(has_text="Bahasa Indonesia").first
             if lang_btn.is_visible(timeout=3000):
@@ -236,29 +166,41 @@ def scrape_shopee_playwright(product_url):
         try:
             full_page_text = page.inner_text("body")
             
+            # TAMBAHKAN J dan T DI DALAM KURUNG SIKU!
             match_ratings = re.search(r'([\d.,]+[KMRBJTm+]*)\s*\n?\s*(?:Ratings|Penilaian)', full_page_text, re.IGNORECASE)
             total_ratings = match_ratings.group(1) if match_ratings else "0"
 
             match_sold = re.search(r'([\d.,]+[KMRBJT+]*)\s*\n?\s*(?:Sold|Terjual)', full_page_text, re.IGNORECASE)
             historical_sold = match_sold.group(1).upper() if match_sold else "0"
             
+            
             if extracted_data['api_info']:
                 info = extracted_data['api_info']
-                full_data = extracted_data['api_data_full'] 
+                full_data = extracted_data['api_data_full'] # Panggil data utuhnya
                     
                 item_name = info.get('name') or info.get('title', 'Nama tidak ditemukan')
                 rating_star = info.get('item_rating', {}).get('rating_star', 0.0)
                 shop_location = info.get('shop_location', 'Lokasi tidak diketahui')
                     
+                # --- PENGAMBILAN NAMA TOKO YANG SUDAH DIPERBAIKI ---
                 shop_name = "Toko Tidak Ditemukan"
+                    
+                # 1. Prioritas Utama: Cari di data UTUH (tempat shop_detailed sebenarnya berada)
                 if 'shop_detailed' in full_data and 'name' in full_data['shop_detailed']:
                     shop_name = full_data['shop_detailed']['name']
+                    # 2. Cadangan 1: Dari data info item (jika struktur berubah)
                 elif 'shop_detailed' in info and 'name' in info['shop_detailed']:
                     shop_name = info['shop_detailed']['name']
+                    # 3. Cadangan 2: Dari tangkapan API khusus Toko
                 elif extracted_data['shop_name_api']:
                     shop_name = extracted_data['shop_name_api']
+                # 4. Cadangan 3: Struktur lama
                 elif 'shop_basic' in info and 'name' in info['shop_basic']:
                     shop_name = info['shop_basic']['name']
+                    
+                # HAPUS Opsi 4 (Pencarian CSS dari DOM) agar tidak pernah nyasar ke "Footer" lagi!
+                # ---------------------------------------------------------
+
 
                 image_hash = info.get('image', '')
                 image_url = f"https://cf.shopee.co.id/file/{image_hash}" if image_hash else ""
@@ -267,6 +209,8 @@ def scrape_shopee_playwright(product_url):
                 parsed_variants = []
                 for model in models:
                     v_name = model.get('name')
+                    
+                    # Cek jika namanya kosong, None, atau hanya berisi spasi
                     if not v_name or v_name.strip() == "":
                         v_name = "Default"
                         
@@ -279,8 +223,8 @@ def scrape_shopee_playwright(product_url):
                     "shop_name": shop_name, 
                     "item_name": item_name,
                     "rating_star": round(rating_star, 1),
-                    "total_ratings": parse_shopee_metric(total_ratings),
-                    "sold": parse_shopee_metric(historical_sold),
+                    "total_ratings": total_ratings,
+                    "sold": historical_sold,
                     "image_url": image_url,
                     "location": shop_location,
                     "variants": parsed_variants,
