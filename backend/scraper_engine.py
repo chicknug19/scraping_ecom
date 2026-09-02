@@ -33,7 +33,7 @@ def scrape_shop_profile(username):
     shop_data = None
     
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True) 
+        browser = p.chromium.launch(headless=False) 
         context = browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
             viewport={"width": 1920, "height": 1080}
@@ -109,7 +109,7 @@ def get_competitor_urls(keyword, limit=10, location=""):
     product_links = []
     
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True) 
+        browser = p.chromium.launch(headless=False) 
         context = browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
             viewport={"width": 1920, "height": 1080}
@@ -175,15 +175,20 @@ def get_competitor_urls(keyword, limit=10, location=""):
 
 
 # --- FUNGSI 4: MENCARI URL PRODUK BERDASARKAN TOKO KOMPETITOR ---
-def get_store_product_urls(username, limit=10):
-    print(f"\n🏬 [FASE 1 - TOKO] Mengambil max {limit} URL produk dari toko: '{username}'...")
+def get_store_product_urls(username, keyword="", limit=10, is_all=False):
+    target_limit = 9999 if is_all else limit
+    print(f"\n🏬 [FASE 1] Menjelajah toko '{username}' | Pencarian: '{keyword}' | Target: {target_limit} produk...")
     
-    # Parameter sortBy=pop akan mengurutkan produk dari yang paling laris (Terjual terbanyak)
-    shop_url = f"https://shopee.co.id/{username}?page=0&sortBy=pop"
+    if keyword:
+        encoded_keyword = urllib.parse.quote(keyword)
+        shop_url = f"https://shopee.co.id/{username}?page=0&sortBy=pop&keyword={encoded_keyword}"
+    else:
+        shop_url = f"https://shopee.co.id/{username}?page=0&sortBy=pop"
+        
     product_links = []
     
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True) 
+        browser = p.chromium.launch(headless=False) 
         context = browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
             viewport={"width": 1920, "height": 1080}
@@ -195,53 +200,101 @@ def get_store_product_urls(username, limit=10):
             try:
                 cookies_data = json.loads(cookies_env)
                 context.add_cookies([{"name": c.get("name"), "value": c.get("value"), "domain": c.get("domain"), "path": c.get("path", "/")} for c in cookies_data])
-            except Exception as e:
-                pass
+            except: pass
         elif os.path.exists("cookies.json"):
             try:
                 with open("cookies.json", "r", encoding="utf-8") as f:
                     context.add_cookies([{"name": c.get("name"), "value": c.get("value"), "domain": c.get("domain"), "path": c.get("path", "/")} for c in json.load(f)])
-            except Exception as e:
-                pass
+            except: pass
             
         page = context.new_page()
         page.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
 
+        print(f"Membuka URL: {shop_url}")
         try:
-            page.goto(shop_url, timeout=45000, wait_until="commit")
+            # wait_until domcontentloaded lebih stabil daripada wait_until commit
+            page.goto(shop_url, timeout=60000, wait_until="domcontentloaded")
+            time.sleep(4) # Wajib jeda agar JS Shopee sempat bangun
         except Exception as e:
             print(f"Info navigasi toko: {e}")
 
-        print(f"Menunggu elemen produk dimuat di etalase {username}...")
+        # 1. Tutup Popup Bahasa (Bila muncul)
         try:
-            page.locator("a[href*='-i.']").first.wait_for(timeout=15000)
-        except:
-            time.sleep(5)
+            lang_btn = page.locator('button').filter(has_text="Bahasa Indonesia").first
+            if lang_btn.is_visible(timeout=2000):
+                lang_btn.click()
+                time.sleep(1)
+        except: pass
 
-        # Logika scroll dinamis menyesuaikan limit produk yang diminta
-        scroll_attempts = (limit // 10) + 3 
-        for _ in range(scroll_attempts):
-            page.mouse.wheel(0, 1500)
-            time.sleep(1.5)
+        # 2. Tutup Popup Voucher/Iklan (Klik paksa area kosong di pojok kiri atas)
+        page.mouse.click(5, 5)
+        time.sleep(1)
+
+        # 3. Jika tanpa keyword, paksa Shopee pindah ke tab "Semua Produk" agar banner lenyap
+        if not keyword:
+            try:
+                tab_semua = page.locator("a, div").filter(has_text=re.compile(r"^(Semua Produk|All Products)$", re.IGNORECASE)).last
+                if tab_semua.is_visible(timeout=2000):
+                    tab_semua.click()
+                    time.sleep(3)
+            except: pass
+
+        print(f"Menyapu etalase {username} secara real-time...")
         
-        try:
-            elements = page.locator("a[href*='-i.']").element_handles()
-            for el in elements:
-                href = el.get_attribute("href")
-                if href:
-                    clean_url = ("https://shopee.co.id" + href).split("?")[0]
-                    # Hindari URL iklan atau kategori
-                    if clean_url not in product_links and "ads" not in clean_url.lower():
-                        product_links.append(clean_url)
-                    if len(product_links) >= limit:
-                        break
-        except Exception as e:
-            print(f"Error saat ekstrak link toko: {e}")
-        finally:
-            browser.close()
+        # JURUS BARU: Sapu Layar (Scroll pelan + Ekstrak di tengah jalan)
+        scroll_attempts = 60 if is_all else (target_limit // 10) + 5 
+        
+        for _ in range(scroll_attempts):
+            try:
+                # Ambil apa saja yang terlihat di layar SAAT INI
+                elements = page.locator("a[href*='-i.']").element_handles()
+                for el in elements:
+                    href = el.get_attribute("href")
+                    if href:
+                        clean_url = ("https://shopee.co.id" + href).split("?")[0]
+                        
+                        # Filter Kata Kunci oleh Python (Versi Super Akurat)
+                        if keyword:
+                            url_text = clean_url.lower().replace("-", " ")
+                            search_term = keyword.lower()
+                            
+                            # Cek persis seluruh frasa
+                            is_match = search_term in url_text
+                            
+                            # Jika tidak cocok persis, cek per kata menggunakan batas kata (Word Boundary)
+                            if not is_match:
+                                keyword_parts = search_term.split()
+                                match_count = 0
+                                for part in keyword_parts:
+                                    # Menggunakan regex \b agar "12" tidak cocok dengan "128gb"
+                                    if re.search(r'\b' + re.escape(part) + r'\b', url_text):
+                                        match_count += 1
+                                        
+                                if match_count == len(keyword_parts):
+                                    is_match = True
+                                    
+                            if not is_match:
+                                continue
+                                
+                        if clean_url not in product_links and "ads" not in clean_url.lower():
+                            product_links.append(clean_url)
+                            
+                        if len(product_links) >= target_limit:
+                            break
+            except:
+                pass
+                
+            if len(product_links) >= target_limit:
+                break
+                
+            # Scroll pelan-pelan lalu tunggu 2 detik agar Shopee memuat produk berikutnya
+            page.mouse.wheel(0, 800)
+            time.sleep(2) 
             
+        browser.close()
+        
     print(f"✅ Ditemukan {len(product_links)} link produk dari toko {username}.")
-    return product_links
+    return product_links[:target_limit]
 
 
 # --- FUNGSI 3: MENARIK DATA PRODUK ---
@@ -250,7 +303,7 @@ def scrape_shopee_playwright(product_url):
     result_data = None 
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
+        browser = p.chromium.launch(headless=False)
         context = browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
             viewport={"width": 1920, "height": 1080}

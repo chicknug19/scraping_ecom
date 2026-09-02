@@ -210,31 +210,41 @@ def run_scraper(req: ScrapeRequest):
     return {"message": "Selesai", "results": semua_data}
 
 
-# Model untuk menerima request berbentuk array (banyak toko sekaligus)
+
+
+# Model untuk tugas individual
+class StoreTask(BaseModel):
+    username: str
+    keyword: str = ""
+    limit: int = 10
+    isAll: bool = False
+
+# Model pembungkus array tugas
 class StoreScrapeRequest(BaseModel):
-    usernames: list[str] # Contoh: ["mayusnack", "gesrek_cellular"]
-    limit_per_store: int = 5 # Batasi agar tes awal tidak memakan waktu lama
+    tasks: list[StoreTask]
 
 @app.post("/api/scrape-stores")
 def run_store_scraper(req: StoreScrapeRequest):
-    print(f"\n🚀 Memulai scraping untuk toko: {req.usernames} (Limit: {req.limit_per_store} produk/toko)")
+    print(f"\n🚀 Memulai Multi-Task Store Scraper. Total Tugas: {len(req.tasks)}")
     semua_data = []
 
-    # Looping menelusuri setiap toko satu per satu
-    for username in req.usernames:
-        # Panggil fungsi yang baru kita buat
-        daftar_url = get_store_product_urls(username=username, limit=req.limit_per_store)
+    for task in req.tasks:
+        # Panggil API cerdas dengan semua parameter yang diminta UI
+        daftar_url = get_store_product_urls(
+            username=task.username, 
+            keyword=task.keyword, 
+            limit=task.limit, 
+            is_all=task.isAll
+        )
         
-        # Ekstrak data sedalam-dalamnya untuk tiap URL produk
         for target_url in daftar_url:
             data_produk = scrape_shopee_playwright(target_url)
             if data_produk:
                 semua_data.append(data_produk)
-                save_to_database(data_produk) # Upsert otomatis mengamankan duplikat
-            time.sleep(2) # Jeda aman anti-blokir
+                save_to_database(data_produk)
+            time.sleep(2)
 
-    return {"message": f"Selesai memproses {len(req.usernames)} toko", "results": semua_data}
-
+    return {"message": f"Berhasil memproses {len(req.tasks)} tugas.", "results": semua_data}
 
 if __name__ == "__main__":
     import uvicorn
