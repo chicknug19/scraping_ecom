@@ -1,8 +1,15 @@
-# Menggunakan image resmi Microsoft Playwright yang sudah berisi Chromium
+# Menggunakan image resmi Microsoft Playwright yang sudah berisi Chromium (Ubuntu Jammy 22.04)
 FROM mcr.microsoft.com/playwright/python:v1.40.0-jammy
 
-# Menentukan direktori kerja di dalam kontainer
 WORKDIR /app
+
+# --- TAMBAHKAN BLOK INI: Menginstal Microsoft ODBC Driver 17 untuk PyODBC ---
+RUN apt-get update && apt-get install -y curl apt-transport-https gnupg2 unixodbc-dev \
+    && curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
+    && curl https://packages.microsoft.com/config/ubuntu/22.04/prod.list > /etc/apt/sources.list.d/mssql-release.list \
+    && apt-get update \
+    && ACCEPT_EULA=Y apt-get install -y msodbcsql17
+# ----------------------------------------------------------------------------
 
 # Menyalin file daftar dependensi dan menginstalnya
 COPY requirements.txt .

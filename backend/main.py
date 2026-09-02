@@ -5,7 +5,6 @@ import pyodbc
 import os
 import time
 from dotenv import load_dotenv
-from scraper_engine import get_competitor_urls, scrape_shopee_playwright
 from typing import Optional
 from google import genai
 from google.genai import types
