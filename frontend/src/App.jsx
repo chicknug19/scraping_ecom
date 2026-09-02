@@ -15,16 +15,16 @@ export default function App() {
   const [aiLoading, setAiLoading] = useState(false);
   const [aiResponse, setAiResponse] = useState('');
 
-  // --- FUNGSI SCRAPING ---
   const handleScrape = async () => {
     if (!keyword) return alert("Masukkan keyword terlebih dahulu!");
     
     setLoading(true);
     setScrapedData([]);
 
+
     try {
-      const response = await fetch('scraper-radi-caheg6c6g6gcghbf.indonesiacentral-01.azurewebsites.net', {
-        // const response = await fetch('http://localhost:8000/api/scrape', {
+      // const response = await fetch('scraper-radi-caheg6c6g6gcghbf.indonesiacentral-01.azurewebsites.net', {
+        const response = await fetch('http://localhost:8000/api/scrape', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 

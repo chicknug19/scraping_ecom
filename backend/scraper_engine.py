@@ -250,11 +250,21 @@ def scrape_shopee_playwright(product_url):
         try:
             full_page_text = page.inner_text("body")
             
+            # --- TANGKAP NIB ---
+            match_nib = re.search(r'NIB:\s*([0-9*]+)', full_page_text, re.IGNORECASE)
+            nib_value = match_nib.group(1) if match_nib else "Tidak Ada NIB"
+            
+            # --- JURUS CADANGAN DARI LAYAR (DOM HTML) ---
             match_ratings = re.search(r'([\d.,]+[KMRBJTm+]*)\s*\n?\s*(?:Ratings|Penilaian)', full_page_text, re.IGNORECASE)
-            total_ratings = match_ratings.group(1) if match_ratings else "0"
+            backup_ratings = match_ratings.group(1) if match_ratings else "0"
 
             match_sold = re.search(r'([\d.,]+[KMRBJT+]*)\s*\n?\s*(?:Sold|Terjual)', full_page_text, re.IGNORECASE)
             historical_sold = match_sold.group(1).upper() if match_sold else "0"
+            
+            # --- LOGIKA BARU: MENANGKAP NIB ---
+            match_nib = re.search(r'NIB:\s*([0-9*]+)', full_page_text, re.IGNORECASE)
+            nib_value = match_nib.group(1) if match_nib else "Tidak Ada NIB"
+            # -----------------------------------
             
             if extracted_data['api_info']:
                 info = extracted_data['api_info']
@@ -263,16 +273,19 @@ def scrape_shopee_playwright(product_url):
                 item_name = info.get('name') or info.get('title', 'Nama tidak ditemukan')
                 rating_star = info.get('item_rating', {}).get('rating_star', 0.0)
                 shop_location = info.get('shop_location', 'Lokasi tidak diketahui')
+                
+                review_data = info.get('product_review', {})
+                
+                # EKSTRAKSI CERDAS: Utamakan JSON. Jika JSON hilang/ditiban, pakai Jurus Cadangan!
+                total_ratings_raw = str(review_data.get('total_rating_count') or review_data.get('rating_count', [0])[0] or backup_ratings)
+                sold_raw = str(review_data.get('historical_sold_display') or review_data.get('historical_sold') or info.get('historical_sold') or backup_sold)
                     
-                shop_name = "Toko Tidak Ditemukan"
-                if 'shop_detailed' in full_data and 'name' in full_data['shop_detailed']:
-                    shop_name = full_data['shop_detailed']['name']
-                elif 'shop_detailed' in info and 'name' in info['shop_detailed']:
-                    shop_name = info['shop_detailed']['name']
-                elif extracted_data['shop_name_api']:
-                    shop_name = extracted_data['shop_name_api']
-                elif 'shop_basic' in info and 'name' in info['shop_basic']:
-                    shop_name = info['shop_basic']['name']
+                shop_detailed = full_data.get('shop_detailed', {}) or info.get('shop_detailed', {})
+                shop_name = shop_detailed.get('name', extracted_data['shop_name_api'] or 'Toko Tidak Ditemukan')
+                shop_username = shop_detailed.get('account', {}).get('username', '')
+                followers_count = shop_detailed.get('follower_count', 0)
+                total_products = shop_detailed.get('item_count', 0)
+                shop_rating = shop_detailed.get('rating_star', 0.0)
 
                 image_hash = info.get('image', '')
                 image_url = f"https://cf.shopee.co.id/file/{image_hash}" if image_hash else ""
@@ -291,15 +304,23 @@ def scrape_shopee_playwright(product_url):
                 
                 result_data = {
                     "shop_name": shop_name, 
+                    "username": shop_username,
                     "item_name": item_name,
                     "rating_star": round(rating_star, 1),
-                    "total_ratings": parse_shopee_metric(total_ratings),
-                    "sold": parse_shopee_metric(historical_sold),
+                    "total_ratings": parse_shopee_metric(total_ratings_raw),
+                    "sold": parse_shopee_metric(sold_raw),
                     "image_url": image_url,
                     "location": shop_location,
                     "variants": parsed_variants,
-                    "source_url": product_url
+                    "source_url": product_url,
+                    "nib": nib_value # Masukkan NIB ke dalam data produk
                 }
+
+                # --- KODE UNTUK DUMP JSON (UNTUK DEBUGGING) ---
+                with open("debug_api_product.json", "w", encoding="utf-8") as f:
+                    json.dump(extracted_data, f, indent=4, ensure_ascii=False)
+                # ----------------------------------------------
+
         except Exception as e:
             print(f"Error saat mengekstrak teks produk: {e}")
         finally:

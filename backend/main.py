@@ -119,23 +119,28 @@ def save_to_database(data):
         conn = pyodbc.connect(conn_str)
         cursor = conn.cursor()
 
-        # ---------------------------------------------------------
+       # ---------------------------------------------------------
         # TAHAP 1: CARI ATAU BUAT PROFIL TOKO (UPSERT STORES)
         # ---------------------------------------------------------
         cursor.execute("SELECT StoreID FROM Stores WHERE ShopName = ?", data['shop_name'])
         store_row = cursor.fetchone()
 
+        # Ambil NIB dari data scraper, default ke "Tidak Ada NIB" jika kosong
+        nib_data = data.get('nib', 'Tidak Ada NIB')
+
         if store_row:
             store_id = store_row[0]
+            # Opsional: Update NIB jika sebelumnya "Tidak Ada NIB" tapi sekarang ketemu
+            cursor.execute("UPDATE Stores SET NIB = ? WHERE StoreID = ? AND NIB = 'Tidak Ada NIB'", nib_data, store_id)
         else:
             # Jika toko belum ada, kita buat profil dasar
             # Username dibuat dari nama toko tanpa spasi sebagai fallback
             fake_username = data['shop_name'].replace(" ", "").lower()[:50]
             cursor.execute("""
-                INSERT INTO Stores (Username, ShopName) 
+                INSERT INTO Stores (Username, ShopName, NIB) 
                 OUTPUT INSERTED.StoreID 
-                VALUES (?, ?)
-            """, fake_username, data['shop_name'])
+                VALUES (?, ?, ?)
+            """, fake_username, data['shop_name'], nib_data)
             store_id = cursor.fetchone()[0]
 
         # ---------------------------------------------------------
