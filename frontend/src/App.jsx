@@ -23,8 +23,8 @@ export default function App() {
 
 
     try {
-      const response = await fetch('scraper-radi-caheg6c6g6gcghbf.indonesiacentral-01.azurewebsites.net', {
-        // const response = await fetch('http://localhost:8000/api/scrape', {
+      // const response = await fetch('scraper-radi-caheg6c6g6gcghbf.indonesiacentral-01.azurewebsites.net', {
+        const response = await fetch('http://localhost:8000/api/scrape', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 

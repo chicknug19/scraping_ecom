@@ -173,6 +173,77 @@ def get_competitor_urls(keyword, limit=10, location=""):
     print(f"✅ Ditemukan {len(product_links)} link target.")
     return product_links
 
+
+# --- FUNGSI 4: MENCARI URL PRODUK BERDASARKAN TOKO KOMPETITOR ---
+def get_store_product_urls(username, limit=10):
+    print(f"\n🏬 [FASE 1 - TOKO] Mengambil max {limit} URL produk dari toko: '{username}'...")
+    
+    # Parameter sortBy=pop akan mengurutkan produk dari yang paling laris (Terjual terbanyak)
+    shop_url = f"https://shopee.co.id/{username}?page=0&sortBy=pop"
+    product_links = []
+    
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True) 
+        context = browser.new_context(
+            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            viewport={"width": 1920, "height": 1080}
+        )
+        
+        # --- LOGIKA PEMUATAN KUKI ---
+        cookies_env = os.getenv("SHOPEE_COOKIES")
+        if cookies_env:
+            try:
+                cookies_data = json.loads(cookies_env)
+                context.add_cookies([{"name": c.get("name"), "value": c.get("value"), "domain": c.get("domain"), "path": c.get("path", "/")} for c in cookies_data])
+            except Exception as e:
+                pass
+        elif os.path.exists("cookies.json"):
+            try:
+                with open("cookies.json", "r", encoding="utf-8") as f:
+                    context.add_cookies([{"name": c.get("name"), "value": c.get("value"), "domain": c.get("domain"), "path": c.get("path", "/")} for c in json.load(f)])
+            except Exception as e:
+                pass
+            
+        page = context.new_page()
+        page.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+
+        try:
+            page.goto(shop_url, timeout=45000, wait_until="commit")
+        except Exception as e:
+            print(f"Info navigasi toko: {e}")
+
+        print(f"Menunggu elemen produk dimuat di etalase {username}...")
+        try:
+            page.locator("a[href*='-i.']").first.wait_for(timeout=15000)
+        except:
+            time.sleep(5)
+
+        # Logika scroll dinamis menyesuaikan limit produk yang diminta
+        scroll_attempts = (limit // 10) + 3 
+        for _ in range(scroll_attempts):
+            page.mouse.wheel(0, 1500)
+            time.sleep(1.5)
+        
+        try:
+            elements = page.locator("a[href*='-i.']").element_handles()
+            for el in elements:
+                href = el.get_attribute("href")
+                if href:
+                    clean_url = ("https://shopee.co.id" + href).split("?")[0]
+                    # Hindari URL iklan atau kategori
+                    if clean_url not in product_links and "ads" not in clean_url.lower():
+                        product_links.append(clean_url)
+                    if len(product_links) >= limit:
+                        break
+        except Exception as e:
+            print(f"Error saat ekstrak link toko: {e}")
+        finally:
+            browser.close()
+            
+    print(f"✅ Ditemukan {len(product_links)} link produk dari toko {username}.")
+    return product_links
+
+
 # --- FUNGSI 3: MENARIK DATA PRODUK ---
 def scrape_shopee_playwright(product_url):
     print(f"Mengakses: {product_url}")
@@ -250,21 +321,18 @@ def scrape_shopee_playwright(product_url):
         try:
             full_page_text = page.inner_text("body")
             
-            # --- TANGKAP NIB ---
-            match_nib = re.search(r'NIB:\s*([0-9*]+)', full_page_text, re.IGNORECASE)
-            nib_value = match_nib.group(1) if match_nib else "Tidak Ada NIB"
-            
             # --- JURUS CADANGAN DARI LAYAR (DOM HTML) ---
             match_ratings = re.search(r'([\d.,]+[KMRBJTm+]*)\s*\n?\s*(?:Ratings|Penilaian)', full_page_text, re.IGNORECASE)
             backup_ratings = match_ratings.group(1) if match_ratings else "0"
 
             match_sold = re.search(r'([\d.,]+[KMRBJT+]*)\s*\n?\s*(?:Sold|Terjual)', full_page_text, re.IGNORECASE)
-            historical_sold = match_sold.group(1).upper() if match_sold else "0"
+            # PERBAIKAN 1: Nama variabel diubah menjadi backup_sold
+            backup_sold = match_sold.group(1).upper() if match_sold else "0" 
             
-            # --- LOGIKA BARU: MENANGKAP NIB ---
+            # --- LOGIKA MENANGKAP NIB ---
             match_nib = re.search(r'NIB:\s*([0-9*]+)', full_page_text, re.IGNORECASE)
             nib_value = match_nib.group(1) if match_nib else "Tidak Ada NIB"
-            # -----------------------------------
+            # ---------------------------------------------
             
             if extracted_data['api_info']:
                 info = extracted_data['api_info']
@@ -276,7 +344,7 @@ def scrape_shopee_playwright(product_url):
                 
                 review_data = info.get('product_review', {})
                 
-                # EKSTRAKSI CERDAS: Utamakan JSON. Jika JSON hilang/ditiban, pakai Jurus Cadangan!
+                # EKSTRAKSI CERDAS: Utamakan JSON. Jika JSON kosong, pakai backup dari layar!
                 total_ratings_raw = str(review_data.get('total_rating_count') or review_data.get('rating_count', [0])[0] or backup_ratings)
                 sold_raw = str(review_data.get('historical_sold_display') or review_data.get('historical_sold') or info.get('historical_sold') or backup_sold)
                     
@@ -302,6 +370,7 @@ def scrape_shopee_playwright(product_url):
                         "price": model.get('price') / 100000
                     })
                 
+                # PERBAIKAN 2: Memasukkan variabel toko yang tertinggal ke dalam result_data
                 result_data = {
                     "shop_name": shop_name, 
                     "username": shop_username,
@@ -313,7 +382,10 @@ def scrape_shopee_playwright(product_url):
                     "location": shop_location,
                     "variants": parsed_variants,
                     "source_url": product_url,
-                    "nib": nib_value # Masukkan NIB ke dalam data produk
+                    "nib": nib_value,
+                    "followers": followers_count,
+                    "total_products": total_products,
+                    "shop_rating": round(shop_rating, 1)
                 }
 
                 # --- KODE UNTUK DUMP JSON (UNTUK DEBUGGING) ---

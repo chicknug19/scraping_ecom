@@ -9,7 +9,7 @@ from scraper_engine import get_competitor_urls, scrape_shopee_playwright
 from typing import Optional
 from google import genai
 from google.genai import types
-
+from scraper_engine import get_competitor_urls, scrape_shopee_playwright, get_store_product_urls
 
 load_dotenv()
 app = FastAPI()
@@ -119,37 +119,44 @@ def save_to_database(data):
         conn = pyodbc.connect(conn_str)
         cursor = conn.cursor()
 
-       # ---------------------------------------------------------
+        # ---------------------------------------------------------
         # TAHAP 1: CARI ATAU BUAT PROFIL TOKO (UPSERT STORES)
         # ---------------------------------------------------------
         cursor.execute("SELECT StoreID FROM Stores WHERE ShopName = ?", data['shop_name'])
         store_row = cursor.fetchone()
 
-        # Ambil NIB dari data scraper, default ke "Tidak Ada NIB" jika kosong
+        # Ambil data lengkap dari scraper
         nib_data = data.get('nib', 'Tidak Ada NIB')
+        followers_data = data.get('followers', 0)
+        products_data = data.get('total_products', 0)
+        shop_rating_data = data.get('shop_rating', 0.0)
+        username_data = data.get('username') or data['shop_name'].replace(" ", "").lower()[:50]
 
         if store_row:
             store_id = store_row[0]
-            # Opsional: Update NIB jika sebelumnya "Tidak Ada NIB" tapi sekarang ketemu
-            cursor.execute("UPDATE Stores SET NIB = ? WHERE StoreID = ? AND NIB = 'Tidak Ada NIB'", nib_data, store_id)
-        else:
-            fake_username = data['shop_name'].replace(" ", "").lower()[:50]
+            # UPDATE: Perbarui Followers dan Rating setiap kali produknya discrape
             cursor.execute("""
-                INSERT INTO Stores (Username, ShopName, NIB) 
+                UPDATE Stores 
+                SET FollowersCount = ?, TotalProducts = ?, Rating = ?, LastUpdated = GETDATE(),
+                    NIB = CASE WHEN NIB = 'Tidak Ada NIB' OR NIB IS NULL THEN ? ELSE NIB END
+                WHERE StoreID = ?
+            """, followers_data, products_data, shop_rating_data, nib_data, store_id)
+        else:
+            # INSERT: Masukkan data toko secara utuh
+            cursor.execute("""
+                INSERT INTO Stores (Username, ShopName, NIB, FollowersCount, TotalProducts, Rating) 
                 OUTPUT INSERTED.StoreID 
-                VALUES (?, ?, ?)
-            """, fake_username, data['shop_name'], nib_data)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """, username_data, data['shop_name'], nib_data, followers_data, products_data, shop_rating_data)
             store_id = cursor.fetchone()[0]
 
         # ---------------------------------------------------------
         # TAHAP 2: UPSERT DATA PRODUK (ITEMS)
         # ---------------------------------------------------------
-        # Cek apakah produk ini dari toko ini sudah ada di database
         cursor.execute("SELECT ItemCode FROM Items WHERE ItemName = ? AND StoreID = ?", data['item_name'], store_id)
         item_row = cursor.fetchone()
 
         if item_row:
-            # JIKA ADA: Cukup perbarui angka penjualan dan rating terbaru
             generated_item_code = item_row[0]
             cursor.execute("""
                 UPDATE Items 
@@ -157,11 +164,8 @@ def save_to_database(data):
                 WHERE ItemCode = ?
             """, data['total_ratings'], data['sold'], data['rating_star'], data['image_url'], data['location'], generated_item_code)
             
-            # Bersihkan varian lama agar bisa diganti dengan harga hari ini
             cursor.execute("DELETE FROM ItemVariants WHERE ItemCode = ?", generated_item_code)
         else:
-            # JIKA BELUM ADA: Masukkan sebagai produk baru
-            # Pastikan tabel Items milikmu sudah memiliki kolom StoreID dan membuang kolom ShopName
             cursor.execute("""
                 INSERT INTO Items (ItemName, StoreID, Location, RatingStar, TotalRatings, TotalSold, ImageURL, SourceURL)
                 OUTPUT INSERTED.ItemCode
@@ -204,6 +208,33 @@ def run_scraper(req: ScrapeRequest):
         time.sleep(2)
 
     return {"message": "Selesai", "results": semua_data}
+
+
+# Model untuk menerima request berbentuk array (banyak toko sekaligus)
+class StoreScrapeRequest(BaseModel):
+    usernames: list[str] # Contoh: ["mayusnack", "gesrek_cellular"]
+    limit_per_store: int = 5 # Batasi agar tes awal tidak memakan waktu lama
+
+@app.post("/api/scrape-stores")
+def run_store_scraper(req: StoreScrapeRequest):
+    print(f"\n🚀 Memulai scraping untuk toko: {req.usernames} (Limit: {req.limit_per_store} produk/toko)")
+    semua_data = []
+
+    # Looping menelusuri setiap toko satu per satu
+    for username in req.usernames:
+        # Panggil fungsi yang baru kita buat
+        daftar_url = get_store_product_urls(username=username, limit=req.limit_per_store)
+        
+        # Ekstrak data sedalam-dalamnya untuk tiap URL produk
+        for target_url in daftar_url:
+            data_produk = scrape_shopee_playwright(target_url)
+            if data_produk:
+                semua_data.append(data_produk)
+                save_to_database(data_produk) # Upsert otomatis mengamankan duplikat
+            time.sleep(2) # Jeda aman anti-blokir
+
+    return {"message": f"Selesai memproses {len(req.usernames)} toko", "results": semua_data}
+
 
 if __name__ == "__main__":
     import uvicorn
