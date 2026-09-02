@@ -133,8 +133,6 @@ def save_to_database(data):
             # Opsional: Update NIB jika sebelumnya "Tidak Ada NIB" tapi sekarang ketemu
             cursor.execute("UPDATE Stores SET NIB = ? WHERE StoreID = ? AND NIB = 'Tidak Ada NIB'", nib_data, store_id)
         else:
-            # Jika toko belum ada, kita buat profil dasar
-            # Username dibuat dari nama toko tanpa spasi sebagai fallback
             fake_username = data['shop_name'].replace(" ", "").lower()[:50]
             cursor.execute("""
                 INSERT INTO Stores (Username, ShopName, NIB) 
