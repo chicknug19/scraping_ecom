@@ -26,15 +26,16 @@ jobs:
         uses: docker/login-action@v2
         with:
           registry: https://ghcr.io/
-          username: ${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_FDD7F23CF44849B1BA463ABDF8DC4B61 }}
-          password: ${{ secrets.AZUREAPPSERVICE_CONTAINERPASSWORD_82722087AD5442CAB7A1CA42B23B818A }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
+          
       - name: Build and push container image to registry
         uses: docker/build-push-action@v3
         with:
           context: ./backend/
           push: true
-          tags: ghcr.io/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_FDD7F23CF44849B1BA463ABDF8DC4B61 }}/ghp_kjuxgphh4om3fk1oko1tceqh5fn7ji2ztx0g:${{ github.sha }}
+          tags: ghcr.io/${{ github.actor }}/scraper-api:${{ github.sha }}
           file: ./backend/Dockerfile
 
   deploy:
@@ -60,5 +61,5 @@ jobs:
         with:
           app-name: 'scraper-radi'
           slot-name: 'Production'
-          images: 'ghcr.io/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_FDD7F23CF44849B1BA463ABDF8DC4B61 }}/ghp_kjuxgphh4om3fk1oko1tceqh5fn7ji2ztx0g:${{ github.sha }}'
+          images: 'ghcr.io/${{ github.actor }}/scraper-api:${{ github.sha }}'
           
