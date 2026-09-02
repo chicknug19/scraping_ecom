@@ -33,16 +33,7 @@ def scrape_shop_profile(username):
     shop_data = None
     
     with sync_playwright() as p:
-        # Di dalam file scraper_engine.py
-        browser = p.chromium.launch(
-            headless=True,
-            args=[
-                "--no-sandbox",
-                "--disable-setuid-sandbox",
-                "--disable-dev-shm-usage",
-                "--disable-blink-features=AutomationControlled", # <--- Sangat penting agar tidak terdeteksi bot
-            ]
-        )
+        browser = p.chromium.launch(headless=True)
         context = browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
             viewport={"width": 1920, "height": 1080}
@@ -118,15 +109,7 @@ def get_competitor_urls(keyword, limit=10, location=""):
     product_links = []
     
     with sync_playwright() as p:
-        browser = p.chromium.launch(
-            headless=True,
-            args=[
-                "--no-sandbox",
-                "--disable-setuid-sandbox",
-                "--disable-dev-shm-usage",
-                "--disable-blink-features=AutomationControlled", # <--- Sangat penting agar tidak terdeteksi bot
-            ]
-        )
+        browser = p.chromium.launch(headless=True)
         context = browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
             viewport={"width": 1920, "height": 1080}
@@ -205,16 +188,7 @@ def get_store_product_urls(username, keyword="", limit=10, is_all=False):
     product_links = []
     
     with sync_playwright() as p:
-        # Di dalam file scraper_engine.py
-        browser = p.chromium.launch(
-            headless=True,
-            args=[
-                "--no-sandbox",
-                "--disable-setuid-sandbox",
-                "--disable-dev-shm-usage",
-                "--disable-blink-features=AutomationControlled", # <--- Sangat penting agar tidak terdeteksi bot
-            ]
-        ) 
+        browser = p.chromium.launch(headless=True) 
         context = browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
             viewport={"width": 1920, "height": 1080}
@@ -329,16 +303,7 @@ def scrape_shopee_playwright(product_url):
     result_data = None 
 
     with sync_playwright() as p:
-        # Di dalam file scraper_engine.py
-        browser = p.chromium.launch(
-            headless=True,
-            args=[
-                "--no-sandbox",
-                "--disable-setuid-sandbox",
-                "--disable-dev-shm-usage",
-                "--disable-blink-features=AutomationControlled", # <--- Sangat penting agar tidak terdeteksi bot
-            ]
-        )
+        browser = p.chromium.launch(headless=True)
         context = browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
             viewport={"width": 1920, "height": 1080}
