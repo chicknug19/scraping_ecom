@@ -125,7 +125,6 @@ def save_to_database(data):
         cursor.execute("SELECT StoreID FROM Stores WHERE ShopName = ?", data['shop_name'])
         store_row = cursor.fetchone()
 
-        # Ambil data lengkap dari scraper
         nib_data = data.get('nib', 'Tidak Ada NIB')
         followers_data = data.get('followers', 0)
         products_data = data.get('total_products', 0)
@@ -134,19 +133,17 @@ def save_to_database(data):
 
         if store_row:
             store_id = store_row[0]
-            # UPDATE: Perbarui Followers dan Rating setiap kali produknya discrape
             cursor.execute("""
                 UPDATE Stores 
-                SET FollowersCount = ?, TotalProducts = ?, Rating = ?, LastUpdated = GETDATE(),
+                SET FollowersCount = ?, TotalProducts = ?, Rating = ?, LastUpdated = DATEADD(hour, 7, GETUTCDATE()),
                     NIB = CASE WHEN NIB = 'Tidak Ada NIB' OR NIB IS NULL THEN ? ELSE NIB END
                 WHERE StoreID = ?
             """, followers_data, products_data, shop_rating_data, nib_data, store_id)
         else:
-            # INSERT: Masukkan data toko secara utuh
             cursor.execute("""
-                INSERT INTO Stores (Username, ShopName, NIB, FollowersCount, TotalProducts, Rating) 
+                INSERT INTO Stores (Username, ShopName, NIB, FollowersCount, TotalProducts, Rating, LastUpdated) 
                 OUTPUT INSERTED.StoreID 
-                VALUES (?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, DATEADD(hour, 7, GETUTCDATE()))
             """, username_data, data['shop_name'], nib_data, followers_data, products_data, shop_rating_data)
             store_id = cursor.fetchone()[0]
 
@@ -158,19 +155,21 @@ def save_to_database(data):
 
         if item_row:
             generated_item_code = item_row[0]
+            # UPDATE: Mengembalikan ShopName ke dalam pembaruan tabel Items
             cursor.execute("""
                 UPDATE Items 
-                SET TotalRatings = ?, TotalSold = ?, RatingStar = ?, ImageURL = ?, Location = ?
+                SET TotalRatings = ?, TotalSold = ?, RatingStar = ?, ImageURL = ?, Location = ?, ShopName = ?, ScrapedAt = DATEADD(hour, 7, GETUTCDATE())
                 WHERE ItemCode = ?
-            """, data['total_ratings'], data['sold'], data['rating_star'], data['image_url'], data['location'], generated_item_code)
+            """, data['total_ratings'], data['sold'], data['rating_star'], data['image_url'], data['location'], data['shop_name'], generated_item_code)
             
             cursor.execute("DELETE FROM ItemVariants WHERE ItemCode = ?", generated_item_code)
         else:
+            # INSERT: Mengembalikan ShopName ke dalam data baru tabel Items
             cursor.execute("""
-                INSERT INTO Items (ItemName, StoreID, Location, RatingStar, TotalRatings, TotalSold, ImageURL, SourceURL)
+                INSERT INTO Items (ItemName, StoreID, ShopName, Location, RatingStar, TotalRatings, TotalSold, ImageURL, SourceURL, ScrapedAt)
                 OUTPUT INSERTED.ItemCode
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            """, data['item_name'], store_id, data['location'], data['rating_star'], data['total_ratings'], data['sold'], data['image_url'], data['source_url'])
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, DATEADD(hour, 7, GETUTCDATE()))
+            """, data['item_name'], store_id, data['shop_name'], data['location'], data['rating_star'], data['total_ratings'], data['sold'], data['image_url'], data['source_url'])
             generated_item_code = cursor.fetchone()[0]
 
         # ---------------------------------------------------------
@@ -186,7 +185,7 @@ def save_to_database(data):
 
         conn.commit()
         conn.close()
-        print(f"✅ [DB] Sukses upsert item ID {generated_item_code} untuk Toko {store_id}")
+        print(f"✅ [DB] Sukses upsert item ID {generated_item_code} untuk Toko {store_id} pada WIB")
     except Exception as e:
         print(f"❌ Error DB: {e}")
 
