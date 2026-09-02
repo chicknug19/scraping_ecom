@@ -4,6 +4,7 @@ import re
 import urllib.parse
 from playwright.sync_api import sync_playwright
 import time
+from google import genai
 
 # --- FUNGSI UTILITAS ---
 def parse_shopee_metric(text_value):
@@ -174,27 +175,63 @@ def get_competitor_urls(keyword, limit=10, location=""):
     return product_links
 
 
+# --- FUNGSI AI: FILTER PRODUK SEMANTIK ---
+def filter_urls_with_gemini(raw_products, keyword, target_limit):
+    if not keyword or not raw_products:
+        return [p['url'] for p in raw_products][:target_limit]
+    
+    print(f"🧠 Meminta Gemini menyaring {len(raw_products)} produk untuk mencari makna '{keyword}'...")
+    try:
+        client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+        
+        prompt = f"""Kamu adalah filter mesin pencari e-commerce. User mencari produk HP: "{keyword}".
+        Pahami bahwa penjual sering menyingkat seri, contohnya "iPhone" menjadi "IP", "i-phone", dll.
+        
+        Tugasmu:
+        1. Evaluasi daftar produk di bawah ini berdasarkan judulnya.
+        2. Pilih HANYA produk unit Ponsel/HP utama yang cocok dengan seri yang dicari.
+        3. TOLAK dengan tegas semua produk AKSESORIS (Casing, Case, Cover, Charger, Adaptor, Kabel, Box, Dus, Antigores, dll).
+        4. TOLAK produk yang beda seri (misal mencari iPhone 12, tolak iPhone 11 atau 13).
+        
+        Data Produk JSON:
+        {json.dumps(raw_products[:80], ensure_ascii=False)}
+        
+        KEMBALIKAN RESPONSE DALAM FORMAT ARRAY JSON MURNI BERISI URL YANG LOLOS FILTER.
+        Contoh: ["url1", "url2"]. Jangan gunakan awalan ```json dan akhiran ```."""
+        
+        response = client.models.generate_content(
+            model="gemini-3.5-flash",
+            contents=prompt
+        )
+        
+        # Bersihkan format markdown jika AI bandel
+        clean_text = response.text.strip().replace("```json", "").replace("```", "")
+        valid_urls = json.loads(clean_text)
+        print(f"🎯 Gemini menemukan {len(valid_urls)} produk valid, membuang sisanya.")
+        return valid_urls[:target_limit]
+        
+    except Exception as e:
+        print(f"❌ Error Gemini Filter: {e}")
+        # Jika AI gagal/koneksi putus, fallback mengambil semua (agar data tetap ada)
+        return [p['url'] for p in raw_products][:target_limit]
+
+
 # --- FUNGSI 4: MENCARI URL PRODUK BERDASARKAN TOKO KOMPETITOR ---
 def get_store_product_urls(username, keyword="", limit=10, is_all=False):
     target_limit = 9999 if is_all else limit
-    print(f"\n🏬 [FASE 1] Menjelajah toko '{username}' | Pencarian: '{keyword}' | Target: {target_limit} produk...")
+    print(f"\n🏬 [FASE 1] Menjelajah toko '{username}' | Target: {target_limit} produk...")
     
-    if keyword:
-        encoded_keyword = urllib.parse.quote(keyword)
-        shop_url = f"https://shopee.co.id/{username}?page=0&sortBy=pop&keyword={encoded_keyword}"
-    else:
-        shop_url = f"https://shopee.co.id/{username}?page=0&sortBy=pop"
-        
+    # URL default, kita tidak menggunakan keyword di parameter agar Shopee menampilkan semua
+    shop_url = f"https://shopee.co.id/{username}?page=0&sortBy=pop"
     product_links = []
     
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False) 
+        browser = p.chromium.launch(headless=True) 
         context = browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
             viewport={"width": 1920, "height": 1080}
         )
         
-        # --- LOGIKA PEMUATAN KUKI ---
         cookies_env = os.getenv("SHOPEE_COOKIES")
         if cookies_env:
             try:
@@ -210,91 +247,71 @@ def get_store_product_urls(username, keyword="", limit=10, is_all=False):
         page = context.new_page()
         page.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
 
-        print(f"Membuka URL: {shop_url}")
         try:
-            # wait_until domcontentloaded lebih stabil daripada wait_until commit
             page.goto(shop_url, timeout=60000, wait_until="domcontentloaded")
-            time.sleep(4) # Wajib jeda agar JS Shopee sempat bangun
+            time.sleep(4) 
         except Exception as e:
             print(f"Info navigasi toko: {e}")
 
-        # 1. Tutup Popup Bahasa (Bila muncul)
         try:
             lang_btn = page.locator('button').filter(has_text="Bahasa Indonesia").first
-            if lang_btn.is_visible(timeout=2000):
-                lang_btn.click()
-                time.sleep(1)
+            if lang_btn.is_visible(timeout=2000): lang_btn.click(); time.sleep(1)
         except: pass
 
-        # 2. Tutup Popup Voucher/Iklan (Klik paksa area kosong di pojok kiri atas)
         page.mouse.click(5, 5)
         time.sleep(1)
 
-        # 3. Jika tanpa keyword, paksa Shopee pindah ke tab "Semua Produk" agar banner lenyap
-        if not keyword:
-            try:
-                tab_semua = page.locator("a, div").filter(has_text=re.compile(r"^(Semua Produk|All Products)$", re.IGNORECASE)).last
-                if tab_semua.is_visible(timeout=2000):
-                    tab_semua.click()
-                    time.sleep(3)
-            except: pass
+        try:
+            tab_semua = page.locator("a, div").filter(has_text=re.compile(r"^(Semua Produk|All Products)$", re.IGNORECASE)).last
+            if tab_semua.is_visible(timeout=3000):
+                tab_semua.click()
+                time.sleep(3)
+        except: pass
 
         print(f"Menyapu etalase {username} secara real-time...")
-        
-        # JURUS BARU: Sapu Layar (Scroll pelan + Ekstrak di tengah jalan)
-        scroll_attempts = 60 if is_all else (target_limit // 10) + 5 
+        scroll_attempts = 50 if (is_all or keyword) else (target_limit // 10) + 5 
         
         for _ in range(scroll_attempts):
-            try:
-                # Ambil apa saja yang terlihat di layar SAAT INI
-                elements = page.locator("a[href*='-i.']").element_handles()
-                for el in elements:
-                    href = el.get_attribute("href")
-                    if href:
-                        clean_url = ("https://shopee.co.id" + href).split("?")[0]
-                        
-                        # Filter Kata Kunci oleh Python (Versi Super Akurat)
-                        if keyword:
-                            url_text = clean_url.lower().replace("-", " ")
-                            search_term = keyword.lower()
-                            
-                            # Cek persis seluruh frasa
-                            is_match = search_term in url_text
-                            
-                            # Jika tidak cocok persis, cek per kata menggunakan batas kata (Word Boundary)
-                            if not is_match:
-                                keyword_parts = search_term.split()
-                                match_count = 0
-                                for part in keyword_parts:
-                                    # Menggunakan regex \b agar "12" tidak cocok dengan "128gb"
-                                    if re.search(r'\b' + re.escape(part) + r'\b', url_text):
-                                        match_count += 1
-                                        
-                                if match_count == len(keyword_parts):
-                                    is_match = True
-                                    
-                            if not is_match:
-                                continue
-                                
-                        if clean_url not in product_links and "ads" not in clean_url.lower():
-                            product_links.append(clean_url)
-                            
-                        if len(product_links) >= target_limit:
-                            break
-            except:
-                pass
-                
-            if len(product_links) >= target_limit:
-                break
-                
-            # Scroll pelan-pelan lalu tunggu 2 detik agar Shopee memuat produk berikutnya
-            page.mouse.wheel(0, 800)
-            time.sleep(2) 
+            page.mouse.wheel(0, 1500)
+            time.sleep(1.5)
             
-        browser.close()
-        
-    print(f"✅ Ditemukan {len(product_links)} link produk dari toko {username}.")
-    return product_links[:target_limit]
+        # KEAJAIBAN JS: Sedot semua elemen (Judul + URL) dari layar dalam hitungan milidetik
+        js_code = """
+        () => {
+            let items = [];
+            document.querySelectorAll("a[href*='-i.']").forEach(a => {
+                let url = a.href.split('?')[0];
+                let img = a.querySelector('img');
+                let title = img ? img.getAttribute('alt') : a.innerText.replace(/\\n/g, ' ');
+                if(url && !url.includes('ads') && title) {
+                    items.push({url: url, title: title.trim()});
+                }
+            });
+            return items;
+        }
+        """
+        try:
+            raw_products = page.evaluate(js_code)
+            
+            # Buang duplikat dari data mentah
+            unique_products = []
+            seen_urls = set()
+            for p in raw_products:
+                if p['url'] not in seen_urls:
+                    seen_urls.add(p['url'])
+                    unique_products.append(p)
+                    
+            print(f"📦 Berhasil menyerok {len(unique_products)} produk mentah dari etalase layar.")
+            
+            # PANGGIL AI UNTUK MENYARING
+            product_links = filter_urls_with_gemini(unique_products, keyword, target_limit)
+        except Exception as e:
+            print(f"Error saat ekstrak link pakai JS: {e}")
+        finally:
+            browser.close()
+            
+    print(f"✅ Filter Final: {len(product_links)} link produk akan diteruskan ke Scraper Utama.")
+    return product_links
 
 
 # --- FUNGSI 3: MENARIK DATA PRODUK ---

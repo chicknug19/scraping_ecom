@@ -11,6 +11,7 @@ from google import genai
 from google.genai import types
 from scraper_engine import get_competitor_urls, scrape_shopee_playwright, get_store_product_urls
 
+
 load_dotenv()
 app = FastAPI()
 
@@ -210,7 +211,28 @@ def run_scraper(req: ScrapeRequest):
     return {"message": "Selesai", "results": semua_data}
 
 
-
+# --- FUNGSI AI: NORMALISASI USERNAME TOKO ---
+def normalize_shopee_username(raw_username: str) -> str:
+    if not raw_username or raw_username.strip() == "":
+        return ""
+        
+    try:
+        client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+        prompt = f"""Kamu adalah ahli data e-commerce Indonesia. Tugasmu adalah mengubah input user berupa nama toko menjadi username/slug resmi Shopee.
+        Contoh: 'i box' -> 'iboxofficial', 'queen phone' -> 'queenphonee', 'maybelline' -> 'maybellineindonesiaofficialstore'.
+        Jika kamu tidak mengetahui nama resminya, cukup hapus semua spasi dan jadikan huruf kecil.
+        Input User: '{raw_username}'
+        KEMBALIKAN HANYA USERNAME, TANPA TEKS ATAU TANDA BACA LAIN."""
+        
+        response = client.models.generate_content(
+            model="gemini-3.5-flash",
+            contents=prompt
+        )
+        # AI merespons, kita bersihkan spasi tambahan untuk keamanan
+        return response.text.strip().replace(" ", "").lower()
+    except Exception as e:
+        print(f"⚠️ Error AI Normalization: {e}")
+        return raw_username.replace(" ", "").lower()
 
 # Model untuk tugas individual
 class StoreTask(BaseModel):
@@ -229,9 +251,13 @@ def run_store_scraper(req: StoreScrapeRequest):
     semua_data = []
 
     for task in req.tasks:
-        # Panggil API cerdas dengan semua parameter yang diminta UI
+        # 1. Panggil Gemini untuk membersihkan nama toko
+        clean_username = normalize_shopee_username(task.username)
+        print(f"🤖 AI memvalidasi toko: '{task.username}' -> menjadi '{clean_username}'")
+        
+        # 2. Panggil API cerdas dengan username yang sudah bersih
         daftar_url = get_store_product_urls(
-            username=task.username, 
+            username=clean_username, 
             keyword=task.keyword, 
             limit=task.limit, 
             is_all=task.isAll

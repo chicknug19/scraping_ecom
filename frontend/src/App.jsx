@@ -31,8 +31,8 @@ export default function App() {
 
 
     try {
-      const response = await fetch('scraper-radi-caheg6c6g6gcghbf.indonesiacentral-01.azurewebsites.net', {
-        // const response = await fetch('http://localhost:8000/api/scrape', {
+      // const response = await fetch('scraper-radi-caheg6c6g6gcghbf.indonesiacentral-01.azurewebsites.net', {
+        const response = await fetch('http://localhost:8000/api/scrape', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
@@ -66,8 +66,8 @@ export default function App() {
     setAiResponse(''); 
 
     try {
-        const response = await fetch('scraper-radi-caheg6c6g6gcghbf.indonesiacentral-01.azurewebsites.net', {
-        // const response = await fetch('http://localhost:8000/api/analyze', {
+        // const response = await fetch('scraper-radi-caheg6c6g6gcghbf.indonesiacentral-01.azurewebsites.net', {
+        const response = await fetch('http://localhost:8000/api/analyze', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ user_prompt: prompt })
@@ -113,8 +113,8 @@ export default function App() {
     setScrapedData([]); // Bersihkan layar sebelum memuat yang baru
     
     try {
-      const response = await fetch('scraper-radi-caheg6c6g6gcghbf.indonesiacentral-01.azurewebsites.net', {
-      // const response = await fetch('http://localhost:8000/api/scrape-stores', {
+      // const response = await fetch('scraper-radi-caheg6c6g6gcghbf.indonesiacentral-01.azurewebsites.net', {
+      const response = await fetch('http://localhost:8000/api/scrape-stores', {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tasks: validTasks }),
