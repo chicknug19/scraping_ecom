@@ -33,7 +33,7 @@ def scrape_shop_profile(username):
     shop_data = None
     
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False) 
+        browser = p.chromium.launch(headless=True) 
         context = browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
             viewport={"width": 1920, "height": 1080}
@@ -109,7 +109,7 @@ def get_competitor_urls(keyword, limit=10, location=""):
     product_links = []
     
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False) 
+        browser = p.chromium.launch(headless=True) 
         context = browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
             viewport={"width": 1920, "height": 1080}
@@ -188,7 +188,7 @@ def get_store_product_urls(username, keyword="", limit=10, is_all=False):
     product_links = []
     
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False) 
+        browser = p.chromium.launch(headless=True) 
         context = browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
             viewport={"width": 1920, "height": 1080}
@@ -303,7 +303,7 @@ def scrape_shopee_playwright(product_url):
     result_data = None 
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False)
+        browser = p.chromium.launch(headless=True)
         context = browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
             viewport={"width": 1920, "height": 1080}
