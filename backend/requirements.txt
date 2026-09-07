@@ -4,3 +4,4 @@ playwright
 pyodbc
 python-dotenv
 google-genai
+playwright-stealth
