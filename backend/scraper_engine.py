@@ -5,7 +5,7 @@ import urllib.parse
 from playwright.sync_api import sync_playwright
 import time
 from google import genai
-from playwright_stealth import stealth_sync
+from playwright_stealth import Stealth # <--- PERBAIKAN IMPORT VERSI 2.0+
 
 # --- FUNGSI UTILITAS ---
 def parse_shopee_metric(text_value):
@@ -31,7 +31,8 @@ def scrape_shop_profile(username):
     shop_url = f"https://shopee.co.id/{username}"
     shop_data = None
     
-    with sync_playwright() as p:
+    # <--- PERBAIKAN SYNTAX VERSI 2.0+ --->
+    with Stealth().use_sync(sync_playwright()) as p:
         iphone_13 = p.devices['iPhone 13']
         browser = p.chromium.launch(
             headless=True,
@@ -43,9 +44,7 @@ def scrape_shop_profile(username):
             ]
         )
         context = browser.new_context(**iphone_13)
-        
         page = context.new_page()
-        stealth_sync(page)
 
         try:
             page.goto(shop_url, timeout=45000, wait_until="commit")
@@ -92,7 +91,8 @@ def get_competitor_urls(keyword, limit=10, location=""):
         
     product_links = []
     
-    with sync_playwright() as p:
+    # <--- PERBAIKAN SYNTAX VERSI 2.0+ --->
+    with Stealth().use_sync(sync_playwright()) as p:
         iphone_13 = p.devices['iPhone 13']
         browser = p.chromium.launch(
             headless=True,
@@ -104,9 +104,7 @@ def get_competitor_urls(keyword, limit=10, location=""):
             ]
         )
         context = browser.new_context(**iphone_13)
-            
         page = context.new_page()
-        stealth_sync(page)
 
         try:
             page.goto(search_url, timeout=45000, wait_until="commit")
@@ -143,7 +141,6 @@ def get_competitor_urls(keyword, limit=10, location=""):
             
     print(f"✅ Ditemukan {len(product_links)} link target.")
     return product_links
-
 
 # --- FUNGSI AI: FILTER PRODUK SEMANTIK ---
 def filter_urls_with_gemini(raw_products, keyword, target_limit):
@@ -183,7 +180,6 @@ def filter_urls_with_gemini(raw_products, keyword, target_limit):
         print(f"❌ Error Gemini Filter: {e}")
         return [p['url'] for p in raw_products][:target_limit]
 
-
 # --- FUNGSI 4: MENCARI URL PRODUK BERDASARKAN TOKO KOMPETITOR ---
 def get_store_product_urls(username, keyword="", limit=10, is_all=False):
     target_limit = 9999 if is_all else limit
@@ -192,7 +188,8 @@ def get_store_product_urls(username, keyword="", limit=10, is_all=False):
     shop_url = f"https://shopee.co.id/{username}?page=0&sortBy=pop"
     product_links = []
     
-    with sync_playwright() as p:
+    # <--- PERBAIKAN SYNTAX VERSI 2.0+ --->
+    with Stealth().use_sync(sync_playwright()) as p:
         iphone_13 = p.devices['iPhone 13']
         browser = p.chromium.launch(
             headless=True,
@@ -204,9 +201,7 @@ def get_store_product_urls(username, keyword="", limit=10, is_all=False):
             ]
         )
         context = browser.new_context(**iphone_13)
-            
         page = context.new_page()
-        stealth_sync(page)
 
         try:
             page.goto(shop_url, timeout=60000, wait_until="domcontentloaded")
@@ -269,13 +264,13 @@ def get_store_product_urls(username, keyword="", limit=10, is_all=False):
     print(f"✅ Filter Final: {len(product_links)} link produk akan diteruskan ke Scraper Utama.")
     return product_links
 
-
 # --- FUNGSI 3: MENARIK DATA PRODUK ---
 def scrape_shopee_playwright(product_url):
     print(f"Mengakses via Mobile: {product_url}")
     result_data = None 
 
-    with sync_playwright() as p:
+    # <--- PERBAIKAN SYNTAX VERSI 2.0+ --->
+    with Stealth().use_sync(sync_playwright()) as p:
         iphone_13 = p.devices['iPhone 13']
         browser = p.chromium.launch(
             headless=True,
@@ -287,9 +282,7 @@ def scrape_shopee_playwright(product_url):
             ]
         )
         context = browser.new_context(**iphone_13)
-
         page = context.new_page()
-        stealth_sync(page)
         
         extracted_data = {'api_info': None, 'shop_name_api': None, 'api_data_full': {}}
 
