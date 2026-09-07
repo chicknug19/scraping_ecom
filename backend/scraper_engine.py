@@ -2,12 +2,13 @@ import json
 import os
 import re
 import urllib.parse
-from playwright.sync_api import sync_playwright
 import time
+import pyodbc
+from playwright.sync_api import sync_playwright
 from google import genai
-from playwright_stealth import Stealth # <--- PERBAIKAN IMPORT VERSI 2.0+
+from playwright_stealth import Stealth
 
-# --- FUNGSI UTILITAS ---
+# --- FUNGSI UTILITAS & DATABASE ---
 def parse_shopee_metric(text_value):
     if not text_value:
         return 0
@@ -25,13 +26,44 @@ def parse_shopee_metric(text_value):
         return int(number)
     return 0
 
+def get_cookie_from_db():
+    try:
+        server = os.getenv("DB_SERVER")
+        database = os.getenv("DB_NAME")
+        username = os.getenv("DB_USER")
+        password = os.getenv("DB_PASS")
+        driver = '{ODBC Driver 17 for SQL Server}'
+        conn_str = f'DRIVER={driver};SERVER={server};PORT=1433;DATABASE={database};UID={username};PWD={password}'
+        
+        conn = pyodbc.connect(conn_str)
+        cursor = conn.cursor()
+        cursor.execute("SELECT ConfigValue FROM AppConfigs WHERE ConfigKey = 'SHOPEE_COOKIE'")
+        row = cursor.fetchone()
+        conn.close()
+        
+        if row and row[0]:
+            return json.loads(row[0])
+    except Exception as e:
+        print(f"❌ Error DB Kuki: {e}")
+    return None
+
+def inject_cookies_to_context(context):
+    cookies_db = get_cookie_from_db()
+    if cookies_db:
+        try:
+            context.add_cookies([{"name": c.get("name"), "value": c.get("value"), "domain": c.get("domain"), "path": c.get("path", "/")} for c in cookies_db])
+            print("✅ Kuki sakti berhasil disuntikkan dari Azure SQL!")
+        except Exception as e:
+            print("❌ Gagal menyuntikkan kuki:", e)
+    else:
+        print("⚠️ Peringatan: Tidak ada kuki di database. Berjalan dalam mode Guest.")
+
 # --- FUNGSI 1: MATA-MATA PROFIL TOKO KOMPETITOR ---
 def scrape_shop_profile(username):
     print(f"\n🕵️ [MATA-MATA TOKO] Memeriksa profil: {username}...")
     shop_url = f"https://shopee.co.id/{username}"
     shop_data = None
     
-    # <--- PERBAIKAN SYNTAX VERSI 2.0+ --->
     with Stealth().use_sync(sync_playwright()) as p:
         iphone_13 = p.devices['iPhone 13']
         browser = p.chromium.launch(
@@ -44,6 +76,7 @@ def scrape_shop_profile(username):
             ]
         )
         context = browser.new_context(**iphone_13)
+        inject_cookies_to_context(context) # Suntik Kuki!
         page = context.new_page()
 
         try:
@@ -91,7 +124,6 @@ def get_competitor_urls(keyword, limit=10, location=""):
         
     product_links = []
     
-    # <--- PERBAIKAN SYNTAX VERSI 2.0+ --->
     with Stealth().use_sync(sync_playwright()) as p:
         iphone_13 = p.devices['iPhone 13']
         browser = p.chromium.launch(
@@ -104,11 +136,12 @@ def get_competitor_urls(keyword, limit=10, location=""):
             ]
         )
         context = browser.new_context(**iphone_13)
+        inject_cookies_to_context(context) # Suntik Kuki!
         page = context.new_page()
 
         try:
             page.goto(search_url, timeout=45000, wait_until="commit")
-            print(f"👀 Judul halaman yang dilihat Azure: {page.title()}")
+            print(f"👀 Judul halaman saat ini: {page.title()}") 
         except Exception as e:
             print(f"Info navigasi search: {e}")
 
@@ -189,7 +222,6 @@ def get_store_product_urls(username, keyword="", limit=10, is_all=False):
     shop_url = f"https://shopee.co.id/{username}?page=0&sortBy=pop"
     product_links = []
     
-    # <--- PERBAIKAN SYNTAX VERSI 2.0+ --->
     with Stealth().use_sync(sync_playwright()) as p:
         iphone_13 = p.devices['iPhone 13']
         browser = p.chromium.launch(
@@ -202,6 +234,7 @@ def get_store_product_urls(username, keyword="", limit=10, is_all=False):
             ]
         )
         context = browser.new_context(**iphone_13)
+        inject_cookies_to_context(context) # Suntik Kuki!
         page = context.new_page()
 
         try:
@@ -270,7 +303,6 @@ def scrape_shopee_playwright(product_url):
     print(f"Mengakses via Mobile: {product_url}")
     result_data = None 
 
-    # <--- PERBAIKAN SYNTAX VERSI 2.0+ --->
     with Stealth().use_sync(sync_playwright()) as p:
         iphone_13 = p.devices['iPhone 13']
         browser = p.chromium.launch(
@@ -283,6 +315,7 @@ def scrape_shopee_playwright(product_url):
             ]
         )
         context = browser.new_context(**iphone_13)
+        inject_cookies_to_context(context) # Suntik Kuki!
         page = context.new_page()
         
         extracted_data = {'api_info': None, 'shop_name_api': None, 'api_data_full': {}}
