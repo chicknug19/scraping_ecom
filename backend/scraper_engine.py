@@ -73,14 +73,21 @@ def scrape_shop_profile(username):
                 "--disable-setuid-sandbox",
                 "--disable-dev-shm-usage",
                 "--disable-blink-features=AutomationControlled"
-            ]
+            ],
+            ignore_default_args=["--enable-automation"]
         )
         context = browser.new_context(**iphone_13)
-        inject_cookies_to_context(context) # Suntik Kuki!
+        inject_cookies_to_context(context)
         page = context.new_page()
 
         try:
-            page.goto(shop_url, timeout=45000, wait_until="commit")
+            print("🔥 Melakukan pemanasan ke beranda Shopee...")
+            page.goto("https://shopee.co.id/", timeout=60000, wait_until="domcontentloaded") 
+            time.sleep(3) 
+            
+            print(f"🚀 Menembak URL profil toko: {shop_url}")
+            page.goto(shop_url, timeout=60000, wait_until="domcontentloaded")
+            
             try:
                 page.locator("h1.section-seller-overview-horizontal__portrait-name").wait_for(timeout=10000)
             except:
@@ -133,14 +140,22 @@ def get_competitor_urls(keyword, limit=10, location=""):
                 "--disable-setuid-sandbox",
                 "--disable-dev-shm-usage",
                 "--disable-blink-features=AutomationControlled"
-            ]
+            ],
+            ignore_default_args=["--enable-automation"]
         )
         context = browser.new_context(**iphone_13)
-        inject_cookies_to_context(context) # Suntik Kuki!
+        inject_cookies_to_context(context)
         page = context.new_page()
 
         try:
-            page.goto(search_url, timeout=45000, wait_until="commit")
+            print("🔥 Melakukan pemanasan ke beranda Shopee...")
+            page.goto("https://shopee.co.id/", timeout=60000, wait_until="domcontentloaded") 
+            time.sleep(3) 
+            
+            print(f"🚀 Menembak URL pencarian: {search_url}")
+            page.goto(search_url, timeout=60000, wait_until="domcontentloaded")
+            time.sleep(4)
+            
             print(f"👀 Judul halaman saat ini: {page.title()}") 
         except Exception as e:
             print(f"Info navigasi search: {e}")
@@ -231,15 +246,22 @@ def get_store_product_urls(username, keyword="", limit=10, is_all=False):
                 "--disable-setuid-sandbox",
                 "--disable-dev-shm-usage",
                 "--disable-blink-features=AutomationControlled"
-            ]
+            ],
+            ignore_default_args=["--enable-automation"]
         )
         context = browser.new_context(**iphone_13)
-        inject_cookies_to_context(context) # Suntik Kuki!
+        inject_cookies_to_context(context)
         page = context.new_page()
 
         try:
+            print("🔥 Melakukan pemanasan ke beranda Shopee...")
+            page.goto("https://shopee.co.id/", timeout=60000, wait_until="domcontentloaded") 
+            time.sleep(3) 
+            
+            print(f"🚀 Menembak URL toko: {shop_url}")
             page.goto(shop_url, timeout=60000, wait_until="domcontentloaded")
             time.sleep(4) 
+            print(f"👀 Judul halaman saat ini: {page.title()}")
         except Exception as e:
             print(f"Info navigasi toko: {e}")
 
@@ -312,10 +334,11 @@ def scrape_shopee_playwright(product_url):
                 "--disable-setuid-sandbox",
                 "--disable-dev-shm-usage",
                 "--disable-blink-features=AutomationControlled"
-            ]
+            ],
+            ignore_default_args=["--enable-automation"]
         )
         context = browser.new_context(**iphone_13)
-        inject_cookies_to_context(context) # Suntik Kuki!
+        inject_cookies_to_context(context) 
         page = context.new_page()
         
         extracted_data = {'api_info': None, 'shop_name_api': None, 'api_data_full': {}}
@@ -340,7 +363,13 @@ def scrape_shopee_playwright(product_url):
         page.on("response", handle_response)
 
         try:
-            page.goto(product_url, timeout=45000)
+            print("🔥 Melakukan pemanasan ke beranda Shopee...")
+            page.goto("https://shopee.co.id/", timeout=60000, wait_until="domcontentloaded") 
+            time.sleep(3) 
+            
+            print(f"🚀 Menembak URL produk: {product_url}")
+            page.goto(product_url, timeout=60000, wait_until="domcontentloaded")
+            time.sleep(4)
         except Exception as e:
             pass 
 
