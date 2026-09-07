@@ -108,6 +108,7 @@ def get_competitor_urls(keyword, limit=10, location=""):
 
         try:
             page.goto(search_url, timeout=45000, wait_until="commit")
+            print(f"👀 Judul halaman yang dilihat Azure: {page.title()}")
         except Exception as e:
             print(f"Info navigasi search: {e}")
 
