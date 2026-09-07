@@ -34,7 +34,7 @@ def scrape_shop_profile(username):
     with sync_playwright() as p:
         iphone_13 = p.devices['iPhone 13']
         browser = p.chromium.launch(
-            headless=True,
+            headless=False,
             args=[
                 "--no-sandbox",
                 "--disable-setuid-sandbox",
@@ -95,7 +95,7 @@ def get_competitor_urls(keyword, limit=10, location=""):
     with sync_playwright() as p:
         iphone_13 = p.devices['iPhone 13']
         browser = p.chromium.launch(
-            headless=True,
+            headless=False,
             args=[
                 "--no-sandbox",
                 "--disable-setuid-sandbox",
@@ -195,7 +195,7 @@ def get_store_product_urls(username, keyword="", limit=10, is_all=False):
     with sync_playwright() as p:
         iphone_13 = p.devices['iPhone 13']
         browser = p.chromium.launch(
-            headless=True,
+            headless=False,
             args=[
                 "--no-sandbox",
                 "--disable-setuid-sandbox",
@@ -278,7 +278,7 @@ def scrape_shopee_playwright(product_url):
     with sync_playwright() as p:
         iphone_13 = p.devices['iPhone 13']
         browser = p.chromium.launch(
-            headless=True,
+            headless=False,
             args=[
                 "--no-sandbox",
                 "--disable-setuid-sandbox",
