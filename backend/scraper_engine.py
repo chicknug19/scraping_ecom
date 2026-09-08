@@ -91,7 +91,6 @@ def scrape_shop_profile(username):
             ignore_default_args=["--enable-automation"]
         )
         
-        # MENGGUNAKAN IDENTITAS DESKTOP (Sesuai kodingan asli)
         context = browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
             viewport={"width": 1920, "height": 1080}
@@ -107,6 +106,17 @@ def scrape_shop_profile(username):
             
             print(f"🚀 Menembak URL profil toko: {shop_url}")
             page.goto(shop_url, timeout=60000, wait_until="domcontentloaded")
+            time.sleep(4)
+            
+            # --- JURUS PENGHANCUR POPUP ---
+            try:
+                lang_btn = page.locator('button').filter(has_text="Bahasa Indonesia").first
+                if lang_btn.is_visible(timeout=2000): lang_btn.click(); time.sleep(1)
+            except: pass
+            page.mouse.click(5, 5)
+            page.keyboard.press("Escape")
+            time.sleep(2)
+            # ------------------------------
             
             try:
                 page.locator("h1.section-seller-overview-horizontal__portrait-name").wait_for(timeout=10000)
@@ -165,7 +175,6 @@ def get_competitor_urls(keyword, limit=10, location=""):
             ignore_default_args=["--enable-automation"]
         )
         
-        # MENGGUNAKAN IDENTITAS DESKTOP
         context = browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
             viewport={"width": 1920, "height": 1080}
@@ -181,11 +190,21 @@ def get_competitor_urls(keyword, limit=10, location=""):
             
             print(f"🚀 Menembak URL pencarian: {search_url}")
             page.goto(search_url, timeout=60000, wait_until="domcontentloaded")
-            time.sleep(4)
+            time.sleep(5) 
             
             print(f"👀 Judul halaman saat ini: {page.title()}") 
         except Exception as e:
             print(f"Info navigasi search: {e}")
+
+        # --- JURUS PENGHANCUR POPUP ---
+        try:
+            lang_btn = page.locator('button').filter(has_text="Bahasa Indonesia").first
+            if lang_btn.is_visible(timeout=2000): lang_btn.click(); time.sleep(1)
+        except: pass
+        page.mouse.click(5, 5)
+        page.keyboard.press("Escape")
+        time.sleep(2)
+        # ------------------------------
 
         print("Menunggu elemen produk dimuat di halaman pencarian...")
         try:
@@ -278,7 +297,6 @@ def get_store_product_urls(username, keyword="", limit=10, is_all=False):
             ignore_default_args=["--enable-automation"]
         )
         
-        # MENGGUNAKAN IDENTITAS DESKTOP
         context = browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
             viewport={"width": 1920, "height": 1080}
@@ -294,18 +312,20 @@ def get_store_product_urls(username, keyword="", limit=10, is_all=False):
             
             print(f"🚀 Menembak URL toko: {shop_url}")
             page.goto(shop_url, timeout=60000, wait_until="domcontentloaded")
-            time.sleep(4) 
+            time.sleep(5) 
             print(f"👀 Judul halaman saat ini: {page.title()}")
         except Exception as e:
             print(f"Info navigasi toko: {e}")
 
+        # --- JURUS PENGHANCUR POPUP ---
         try:
             lang_btn = page.locator('button').filter(has_text="Bahasa Indonesia").first
             if lang_btn.is_visible(timeout=2000): lang_btn.click(); time.sleep(1)
         except: pass
-
         page.mouse.click(5, 5)
-        time.sleep(1)
+        page.keyboard.press("Escape")
+        time.sleep(2)
+        # ------------------------------
 
         try:
             tab_semua = page.locator("a, div").filter(has_text=re.compile(r"^(Semua Produk|All Products)$", re.IGNORECASE)).last
@@ -373,7 +393,6 @@ def scrape_shopee_playwright(product_url):
             ignore_default_args=["--enable-automation"]
         )
         
-        # MENGGUNAKAN IDENTITAS DESKTOP
         context = browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
             viewport={"width": 1920, "height": 1080}
@@ -410,17 +429,19 @@ def scrape_shopee_playwright(product_url):
             
             print(f"🚀 Menembak URL produk: {product_url}")
             page.goto(product_url, timeout=60000, wait_until="domcontentloaded")
-            time.sleep(4)
+            time.sleep(5)
         except Exception as e:
             pass 
 
+        # --- JURUS PENGHANCUR POPUP ---
         try:
             lang_btn = page.locator('button').filter(has_text="Bahasa Indonesia").first
-            if lang_btn.is_visible(timeout=3000):
-                lang_btn.click()
-                time.sleep(1)
-        except:
-            pass
+            if lang_btn.is_visible(timeout=2000): lang_btn.click(); time.sleep(1)
+        except: pass
+        page.mouse.click(5, 5)
+        page.keyboard.press("Escape")
+        time.sleep(2)
+        # ------------------------------
 
         print("Menggulir halaman produk untuk merender profil toko...")
         page.mouse.wheel(0, 800)
@@ -431,7 +452,6 @@ def scrape_shopee_playwright(product_url):
         try:
             full_page_text = page.inner_text("body")
             
-            # --- JURUS CADANGAN DARI LAYAR (DOM HTML) ---
             match_ratings = re.search(r'([\d.,]+[KMRBJTm+]*)\s*\n?\s*(?:Ratings|Penilaian)', full_page_text, re.IGNORECASE)
             backup_ratings = match_ratings.group(1) if match_ratings else "0"
 
