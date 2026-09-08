@@ -1,6 +1,7 @@
 import os
 import json
 import pyodbc
+import time
 from playwright.sync_api import sync_playwright
 from dotenv import load_dotenv
 
@@ -34,7 +35,7 @@ def update_shopee_cookie():
 
         # 3. Buka browser untuk Login Manual
         print("\n🌐 Membuka browser... Silakan login ke Shopee secara manual.")
-        print("⚠️ PENTING: Gunakan akun tumbal (dummy), JANGAN akun pribadi atau akun utama PT Cipta Utama Karya!")
+        print("⚠️ PENTING: Gunakan akun tumbal (dummy), JANGAN akun pribadi atau akun utama perusahaan!")
         
         with sync_playwright() as p:
             # Headless=False agar browser terlihat olehmu
@@ -44,9 +45,20 @@ def update_shopee_cookie():
 
             page.goto("https://shopee.co.id/buyer/login")
             
+            # --- AUTO TUTUP POPUP BAHASA UNTUK MEMBANTUMU ---
+            try:
+                print("🧹 Membersihkan popup bahasa jika ada...")
+                lang_btn = page.locator('button').filter(has_text="Bahasa Indonesia").first
+                if lang_btn.is_visible(timeout=5000):
+                    lang_btn.click()
+                    time.sleep(1)
+            except:
+                pass
+            # -------------------------------------------------
+            
             print("⏳ Menunggu kamu menyelesaikan login/OTP... (Skrip akan otomatis lanjut jika berhasil masuk ke beranda)")
             
-            # Menunggu sampai URL berubah menjadi beranda Shopee (maksimal 5 menit)
+            # Menunggu sampai kamu berhasil login dan masuk beranda (maksimal 5 menit)
             page.wait_for_url("https://shopee.co.id/**", timeout=300000) 
             
             # 4. Ekstrak dan Simpan Kuki
