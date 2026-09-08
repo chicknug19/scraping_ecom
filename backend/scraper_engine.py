@@ -58,9 +58,7 @@ def inject_cookies_to_context(context):
     else:
         print("⚠️ Peringatan: Tidak ada kuki di database. Berjalan dalam mode Guest.")
 
-# --- FUNGSI PROXY ---
 def get_proxy_config():
-    """Mengambil konfigurasi proxy dari Environment Variable Azure."""
     proxy_server = os.getenv("PROXY_SERVER")
     proxy_user = os.getenv("PROXY_USER")
     proxy_pass = os.getenv("PROXY_PASS")
@@ -81,10 +79,9 @@ def scrape_shop_profile(username):
     proxy_cfg = get_proxy_config()
     
     with Stealth().use_sync(sync_playwright()) as p:
-        iphone_13 = p.devices['iPhone 13']
         browser = p.chromium.launch(
             headless=True,
-            proxy=proxy_cfg, # <--- SUNTIKAN PROXY
+            proxy=proxy_cfg,
             args=[
                 "--no-sandbox",
                 "--disable-setuid-sandbox",
@@ -93,7 +90,13 @@ def scrape_shop_profile(username):
             ],
             ignore_default_args=["--enable-automation"]
         )
-        context = browser.new_context(**iphone_13)
+        
+        # MENGGUNAKAN IDENTITAS DESKTOP (Sesuai kodingan asli)
+        context = browser.new_context(
+            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            viewport={"width": 1920, "height": 1080}
+        )
+        
         inject_cookies_to_context(context)
         page = context.new_page()
 
@@ -137,7 +140,7 @@ def scrape_shop_profile(username):
 
 # --- FUNGSI 2: MENCARI URL KOMPETITOR ---
 def get_competitor_urls(keyword, limit=10, location=""):
-    print(f"\n🔍 [FASE 1] Mencari {limit} URL untuk kata kunci: '{keyword}' (Lokasi: {location}) via Mobile Stealth...")
+    print(f"\n🔍 [FASE 1] Mencari {limit} URL untuk '{keyword}' via Desktop Stealth + Proxy...")
     
     encoded_keyword = urllib.parse.quote(keyword)
     search_url = f"https://shopee.co.id/search?keyword={encoded_keyword}"
@@ -150,10 +153,9 @@ def get_competitor_urls(keyword, limit=10, location=""):
     proxy_cfg = get_proxy_config()
     
     with Stealth().use_sync(sync_playwright()) as p:
-        iphone_13 = p.devices['iPhone 13']
         browser = p.chromium.launch(
             headless=True,
-            proxy=proxy_cfg, # <--- SUNTIKAN PROXY
+            proxy=proxy_cfg,
             args=[
                 "--no-sandbox",
                 "--disable-setuid-sandbox",
@@ -162,7 +164,13 @@ def get_competitor_urls(keyword, limit=10, location=""):
             ],
             ignore_default_args=["--enable-automation"]
         )
-        context = browser.new_context(**iphone_13)
+        
+        # MENGGUNAKAN IDENTITAS DESKTOP
+        context = browser.new_context(
+            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            viewport={"width": 1920, "height": 1080}
+        )
+        
         inject_cookies_to_context(context)
         page = context.new_page()
 
@@ -251,17 +259,16 @@ def filter_urls_with_gemini(raw_products, keyword, target_limit):
 # --- FUNGSI 4: MENCARI URL PRODUK BERDASARKAN TOKO KOMPETITOR ---
 def get_store_product_urls(username, keyword="", limit=10, is_all=False):
     target_limit = 9999 if is_all else limit
-    print(f"\n🏬 [FASE 1] Menjelajah toko '{username}' | Target: {target_limit} produk via Mobile...")
+    print(f"\n🏬 [FASE 1] Menjelajah toko '{username}' | Target: {target_limit} produk via Desktop...")
     
     shop_url = f"https://shopee.co.id/{username}?page=0&sortBy=pop"
     product_links = []
     proxy_cfg = get_proxy_config()
     
     with Stealth().use_sync(sync_playwright()) as p:
-        iphone_13 = p.devices['iPhone 13']
         browser = p.chromium.launch(
             headless=True,
-            proxy=proxy_cfg, # <--- SUNTIKAN PROXY
+            proxy=proxy_cfg,
             args=[
                 "--no-sandbox",
                 "--disable-setuid-sandbox",
@@ -270,7 +277,13 @@ def get_store_product_urls(username, keyword="", limit=10, is_all=False):
             ],
             ignore_default_args=["--enable-automation"]
         )
-        context = browser.new_context(**iphone_13)
+        
+        # MENGGUNAKAN IDENTITAS DESKTOP
+        context = browser.new_context(
+            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            viewport={"width": 1920, "height": 1080}
+        )
+        
         inject_cookies_to_context(context)
         page = context.new_page()
 
@@ -343,15 +356,14 @@ def get_store_product_urls(username, keyword="", limit=10, is_all=False):
 
 # --- FUNGSI 3: MENARIK DATA PRODUK ---
 def scrape_shopee_playwright(product_url):
-    print(f"Mengakses via Mobile: {product_url}")
+    print(f"Mengakses via Desktop: {product_url}")
     result_data = None 
     proxy_cfg = get_proxy_config()
 
     with Stealth().use_sync(sync_playwright()) as p:
-        iphone_13 = p.devices['iPhone 13']
         browser = p.chromium.launch(
             headless=True,
-            proxy=proxy_cfg, # <--- SUNTIKAN PROXY
+            proxy=proxy_cfg,
             args=[
                 "--no-sandbox",
                 "--disable-setuid-sandbox",
@@ -360,7 +372,13 @@ def scrape_shopee_playwright(product_url):
             ],
             ignore_default_args=["--enable-automation"]
         )
-        context = browser.new_context(**iphone_13)
+        
+        # MENGGUNAKAN IDENTITAS DESKTOP
+        context = browser.new_context(
+            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            viewport={"width": 1920, "height": 1080}
+        )
+        
         inject_cookies_to_context(context) 
         page = context.new_page()
         
@@ -413,6 +431,7 @@ def scrape_shopee_playwright(product_url):
         try:
             full_page_text = page.inner_text("body")
             
+            # --- JURUS CADANGAN DARI LAYAR (DOM HTML) ---
             match_ratings = re.search(r'([\d.,]+[KMRBJTm+]*)\s*\n?\s*(?:Ratings|Penilaian)', full_page_text, re.IGNORECASE)
             backup_ratings = match_ratings.group(1) if match_ratings else "0"
 
