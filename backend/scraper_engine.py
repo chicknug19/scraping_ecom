@@ -58,16 +58,33 @@ def inject_cookies_to_context(context):
     else:
         print("⚠️ Peringatan: Tidak ada kuki di database. Berjalan dalam mode Guest.")
 
+# --- FUNGSI PROXY ---
+def get_proxy_config():
+    """Mengambil konfigurasi proxy dari Environment Variable Azure."""
+    proxy_server = os.getenv("PROXY_SERVER")
+    proxy_user = os.getenv("PROXY_USER")
+    proxy_pass = os.getenv("PROXY_PASS")
+    
+    if proxy_server:
+        return {
+            "server": proxy_server,
+            "username": proxy_user or "",
+            "password": proxy_pass or ""
+        }
+    return None
+
 # --- FUNGSI 1: MATA-MATA PROFIL TOKO KOMPETITOR ---
 def scrape_shop_profile(username):
     print(f"\n🕵️ [MATA-MATA TOKO] Memeriksa profil: {username}...")
     shop_url = f"https://shopee.co.id/{username}"
     shop_data = None
+    proxy_cfg = get_proxy_config()
     
     with Stealth().use_sync(sync_playwright()) as p:
         iphone_13 = p.devices['iPhone 13']
         browser = p.chromium.launch(
             headless=True,
+            proxy=proxy_cfg, # <--- SUNTIKAN PROXY
             args=[
                 "--no-sandbox",
                 "--disable-setuid-sandbox",
@@ -130,11 +147,13 @@ def get_competitor_urls(keyword, limit=10, location=""):
         search_url += f"&locations={encoded_location}"
         
     product_links = []
+    proxy_cfg = get_proxy_config()
     
     with Stealth().use_sync(sync_playwright()) as p:
         iphone_13 = p.devices['iPhone 13']
         browser = p.chromium.launch(
             headless=True,
+            proxy=proxy_cfg, # <--- SUNTIKAN PROXY
             args=[
                 "--no-sandbox",
                 "--disable-setuid-sandbox",
@@ -148,7 +167,7 @@ def get_competitor_urls(keyword, limit=10, location=""):
         page = context.new_page()
 
         try:
-            print("🔥 Melakukan pemanasan ke beranda Shopee...")
+            print(f"🔥 Melakukan pemanasan ke beranda Shopee... (Proxy: {proxy_cfg['server'] if proxy_cfg else 'TIDAK AKTIF'})")
             page.goto("https://shopee.co.id/", timeout=60000, wait_until="domcontentloaded") 
             time.sleep(3) 
             
@@ -236,11 +255,13 @@ def get_store_product_urls(username, keyword="", limit=10, is_all=False):
     
     shop_url = f"https://shopee.co.id/{username}?page=0&sortBy=pop"
     product_links = []
+    proxy_cfg = get_proxy_config()
     
     with Stealth().use_sync(sync_playwright()) as p:
         iphone_13 = p.devices['iPhone 13']
         browser = p.chromium.launch(
             headless=True,
+            proxy=proxy_cfg, # <--- SUNTIKAN PROXY
             args=[
                 "--no-sandbox",
                 "--disable-setuid-sandbox",
@@ -324,11 +345,13 @@ def get_store_product_urls(username, keyword="", limit=10, is_all=False):
 def scrape_shopee_playwright(product_url):
     print(f"Mengakses via Mobile: {product_url}")
     result_data = None 
+    proxy_cfg = get_proxy_config()
 
     with Stealth().use_sync(sync_playwright()) as p:
         iphone_13 = p.devices['iPhone 13']
         browser = p.chromium.launch(
             headless=True,
+            proxy=proxy_cfg, # <--- SUNTIKAN PROXY
             args=[
                 "--no-sandbox",
                 "--disable-setuid-sandbox",
