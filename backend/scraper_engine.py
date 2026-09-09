@@ -186,25 +186,45 @@ def get_competitor_urls(keyword, limit=10, location=""):
         try:
             print(f"🔥 Melakukan pemanasan ke beranda Shopee... (Proxy: {proxy_cfg['server'] if proxy_cfg else 'TIDAK AKTIF'})")
             page.goto("https://shopee.co.id/", timeout=60000, wait_until="domcontentloaded") 
-            time.sleep(3) 
+            time.sleep(4) 
             
-            print(f"🚀 Menembak URL pencarian: {search_url}")
-            page.goto(search_url, timeout=60000, wait_until="domcontentloaded")
-            time.sleep(5) 
+            # --- JURUS PENGHANCUR POPUP AWAL (Sebelum Mengetik) ---
+            try:
+                lang_btn = page.locator('button').filter(has_text="Bahasa Indonesia").first
+                if lang_btn.is_visible(timeout=3000): lang_btn.click(); time.sleep(1)
+            except: pass
+            page.mouse.click(5, 5)
+            page.keyboard.press("Escape")
+            time.sleep(2)
+            # ------------------------------------------------------
             
+            print(f"⌨️ Mengetik kata kunci '{keyword}' di kolom pencarian secara manual...")
+            # Menunggu dan mencari elemen input pencarian
+            search_box = page.locator("input.shopee-searchbar-input__input").first
+            search_box.wait_for(state="visible", timeout=15000)
+            
+            # Mengetik layaknya manusia dan menekan Enter
+            search_box.fill(keyword)
+            time.sleep(1)
+            search_box.press("Enter")
+            
+            # Menunggu hasil pencarian React Shopee dimuat
+            time.sleep(6) 
             print(f"👀 Judul halaman saat ini: {page.title()}") 
+            
         except Exception as e:
-            print(f"Info navigasi search: {e}")
+            print(f"Info navigasi search (Coba Fallback URL): {e}")
+            # Jika gagal mengetik, baru coba tembak URL langsung sebagai cadangan
+            try:
+                page.goto(search_url, timeout=60000, wait_until="domcontentloaded")
+                time.sleep(5)
+            except: pass
 
-        # --- JURUS PENGHANCUR POPUP ---
-        try:
-            lang_btn = page.locator('button').filter(has_text="Bahasa Indonesia").first
-            if lang_btn.is_visible(timeout=2000): lang_btn.click(); time.sleep(1)
-        except: pass
+        # --- JURUS PENGHANCUR POPUP (Cadangan jika muncul lagi) ---
         page.mouse.click(5, 5)
         page.keyboard.press("Escape")
         time.sleep(2)
-        # ------------------------------
+        # ----------------------------------------------------------
 
         print("Menunggu elemen produk dimuat di halaman pencarian...")
         try:
