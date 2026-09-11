@@ -9,9 +9,10 @@ export default function App() {
   const [location, setLocation] = useState(''); 
   const [loading, setLoading] = useState(false);
   const [scrapedData, setScrapedData] = useState([]);
-  // State untuk Scraper Toko
-  const [storeUsernames, setStoreUsernames] = useState("");
-  const [storeLimit, setStoreLimit] = useState(10);
+  
+  // State untuk Scraper Toko (Dinamis & AI)
+  const [isSmartMode, setIsSmartMode] = useState(true); // Toggle AI Mode
+  const [smartPrompt, setSmartPrompt] = useState("");
   const [storeTasks, setStoreTasks] = useState([
     { username: "", keyword: "", limit: 10, isAll: false }
   ]);
@@ -29,9 +30,7 @@ export default function App() {
     setLoading(true);
     setScrapedData([]);
 
-
     try {
-      // const response = await fetch('scraper-radi-caheg6c6g6gcghbf.indonesiacentral-01.azurewebsites.net', {
         const response = await fetch('http://localhost:8000/api/scrape', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -66,7 +65,6 @@ export default function App() {
     setAiResponse(''); 
 
     try {
-        // const response = await fetch('scraper-radi-caheg6c6g6gcghbf.indonesiacentral-01.azurewebsites.net', {
         const response = await fetch('http://localhost:8000/api/analyze', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -86,8 +84,7 @@ export default function App() {
     setAiLoading(false);
   };
 
-
-  // FUNGSI MANAJEMEN FORM
+  // FUNGSI MANAJEMEN FORM MANUAL
   const addTask = () => setStoreTasks([...storeTasks, { username: "", keyword: "", limit: 10, isAll: false }]);
   
   const updateTask = (index, field, value) => {
@@ -101,23 +98,39 @@ export default function App() {
     setStoreTasks(newTasks);
   };
 
-  // FUNGSI SUBMIT KE BACKEND
+  // FUNGSI SUBMIT TOKO (MENGGABUNGKAN MODE AI DAN MANUAL)
   const handleStoreScrape = async () => {
-    const validTasks = storeTasks.filter(t => t.username.trim() !== "");
-    if (validTasks.length === 0) {
-      alert("⚠️ Masukkan minimal 1 username toko!");
-      return;
-    }
-
     setIsStoreLoading(true);
-    setScrapedData([]); // Bersihkan layar sebelum memuat yang baru
+    setScrapedData([]); 
     
     try {
-      // const response = await fetch('scraper-radi-caheg6c6g6gcghbf.indonesiacentral-01.azurewebsites.net', {
-      const response = await fetch('http://localhost:8000/api/scrape-stores', {
+      let endpoint = "";
+      let payload = {};
+
+      if (isSmartMode) {
+        if (!smartPrompt.trim()) {
+          alert("⚠️ Masukkan instruksi AI terlebih dahulu!");
+          setIsStoreLoading(false);
+          return;
+        }
+        // Kita akan membuat endpoint baru ini di backend nanti
+        endpoint = 'http://localhost:8000/api/scrape-smart'; 
+        payload = { prompt: smartPrompt };
+      } else {
+        const validTasks = storeTasks.filter(t => t.username.trim() !== "");
+        if (validTasks.length === 0) {
+          alert("⚠️ Masukkan minimal 1 username toko!");
+          setIsStoreLoading(false);
+          return;
+        }
+        endpoint = 'http://localhost:8000/api/scrape-stores';
+        payload = { tasks: validTasks };
+      }
+
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tasks: validTasks }),
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
@@ -125,13 +138,15 @@ export default function App() {
       // LOGIKA NOTIFIKASI PINTAR
       if (data.results && data.results.length > 0) {
         setScrapedData(data.results);
-        setShowResults(true); // Otomatis buka dropdown jika ada hasil
+        setShowResults(true);
         alert(`✅ Scraping selesai! Berhasil menarik ${data.results.length} produk.`);
+      } else if (data.message) {
+        // AI Agent membalas dengan validasi (misal: "Berapa targetnya?")
+        alert(`🤖 Pesan AI: ${data.message}`);
       } else {
-        alert(`ℹ️ Sudah berhasil mengambil informasi toko, tetapi tidak menemukan produk yang cocok. Produk mungkin habis atau tidak dijual di toko tersebut atau nama produknya salah.`);
+        alert(`ℹ️ Sudah berhasil mengambil informasi, tetapi tidak menemukan produk yang cocok.`);
       }
       
-      console.log("Hasil Scrape Toko:", data.results);
     } catch (error) {
       console.error("Error scraping stores:", error);
       alert("❌ Terjadi kesalahan saat menghubungi server.");
@@ -196,82 +211,114 @@ export default function App() {
         </div>
 
 
-        {/* CARD 3: SCRAPE BERDASARKAN TOKO (DINAMIS) */}
-      <div className="bg-white p-6 rounded-lg shadow-md border-t-4 border-green-500 mb-6">
-        <h2 className="text-xl font-bold text-green-600 mb-4">
-          🏪 Scrape by store and Product of the store
-        </h2>
-
-        {storeTasks.map((task, index) => (
-          <div key={index} className="flex flex-wrap items-end gap-3 mb-4 p-4 border border-gray-200 rounded relative bg-gray-50">
-            {/* Tombol Silang (X) untuk menghapus baris */}
-            {storeTasks.length > 1 && (
-               <button onClick={() => removeTask(index)} className="absolute top-2 right-3 text-red-500 hover:text-red-700 font-bold">✕</button>
-            )}
-
-            <div className="w-full md:w-1/4">
-              <label className="block text-xs font-semibold text-gray-600 mb-1">Username Toko*</label>
-              <input
-                type="text"
-                value={task.username}
-                onChange={(e) => updateTask(index, 'username', e.target.value)}
-                placeholder="Misal: iboxofficial"
-                className="w-full border border-gray-300 rounded p-2 focus:border-green-500 text-sm"
-              />
-            </div>
-
-            <div className="w-full md:w-1/4">
-              <label className="block text-xs font-semibold text-gray-600 mb-1">Cari Produk (Opsional)</label>
-              <input
-                type="text"
-                value={task.keyword}
-                onChange={(e) => updateTask(index, 'keyword', e.target.value)}
-                placeholder="Misal: iPhone 16"
-                className="w-full border border-gray-300 rounded p-2 focus:border-green-500 text-sm"
-              />
-            </div>
-
-            <div className="w-full md:w-1/5">
-              <label className="block text-xs font-semibold text-gray-600 mb-1">Target Jumlah</label>
-              <input
-                type="number"
-                value={task.limit}
-                onChange={(e) => updateTask(index, 'limit', parseInt(e.target.value))}
-                disabled={task.isAll}
-                className={`w-full border rounded p-2 text-sm ${task.isAll ? 'bg-gray-200 text-gray-400' : 'border-gray-300 focus:border-green-500'}`}
-              />
-            </div>
-
-            <div className="w-full md:w-auto flex items-center mb-2 ml-2">
-              <input
-                type="checkbox"
-                checked={task.isAll}
-                onChange={(e) => updateTask(index, 'isAll', e.target.checked)}
-                className="mr-2 h-4 w-4 text-green-600 cursor-pointer"
-              />
-              <label className="text-sm text-gray-700 cursor-pointer" onClick={() => updateTask(index, 'isAll', !task.isAll)}>
-                Ambil Semua (Get All)
-              </label>
+        {/* CARD 3: SCRAPE BERDASARKAN TOKO (DINAMIS & AI) */}
+        <div className="bg-white p-6 rounded-lg shadow-md border-t-4 border-green-500 mb-6">
+          <div className="flex flex-col md:flex-row justify-between items-center mb-6 border-b pb-4">
+            <h2 className="text-xl font-bold text-green-600 mb-4 md:mb-0">
+              🏪 Scrape by store and Product
+            </h2>
+            
+            {/* Toggle Mode */}
+            <div className="flex bg-gray-200 rounded-lg p-1">
+              <button 
+                onClick={() => setIsSmartMode(true)}
+                className={`px-4 py-1.5 text-sm font-bold rounded-md transition-colors ${isSmartMode ? 'bg-white shadow text-green-600' : 'text-gray-500 hover:text-gray-700'}`}>
+                ✨ Mode AI
+              </button>
+              <button 
+                onClick={() => setIsSmartMode(false)}
+                className={`px-4 py-1.5 text-sm font-bold rounded-md transition-colors ${!isSmartMode ? 'bg-white shadow text-green-600' : 'text-gray-500 hover:text-gray-700'}`}>
+                ⚙️ Mode Manual
+              </button>
             </div>
           </div>
-        ))}
 
-        <button onClick={addTask} className="text-sm text-blue-600 font-bold mb-4 hover:underline">
-          + Tambah Toko Lain
-        </button>
+          {/* Render Konten Berdasarkan Mode */}
+          {isSmartMode ? (
+            <div className="mb-6 bg-green-50 p-5 rounded-lg border border-green-100">
+              <label className="block text-sm font-bold text-gray-700 mb-2">Instruksi Scraping (Smart Prompt)</label>
+              <textarea
+                value={smartPrompt}
+                onChange={(e) => setSmartPrompt(e.target.value)}
+                rows="3"
+                className="w-full border border-green-300 rounded-md p-3 focus:ring-2 focus:ring-green-500 outline-none text-sm resize-y"
+                placeholder="Misal: Tolong ambilkan 2 produk iphone 17 dari toko ibox beserta semua aksesorisnya"
+              ></textarea>
+              <p className="text-xs text-gray-500 mt-2 italic">
+                AI akan membaca perintahmu, mencari toko yang dimaksud, dan menerapkan aturan filter secara otomatis.
+              </p>
+            </div>
+          ) : (
+            <div className="mb-6">
+              {storeTasks.map((task, index) => (
+                <div key={index} className="flex flex-wrap items-end gap-3 mb-4 p-4 border border-gray-200 rounded relative bg-gray-50">
+                  {storeTasks.length > 1 && (
+                    <button onClick={() => removeTask(index)} className="absolute top-2 right-3 text-red-500 hover:text-red-700 font-bold">✕</button>
+                  )}
 
-        <button
-          onClick={handleStoreScrape}
-          disabled={isStoreLoading}
-          className={`w-full text-white font-bold py-2 px-4 rounded ${
-            isStoreLoading ? "bg-green-300 cursor-not-allowed" : "bg-green-500 hover:bg-green-600"
-          }`}
-        >
-          {isStoreLoading ? "Memproses Data Toko..." : "Mulai Tarik Produk Toko"}
-        </button>
-      </div>
+                  <div className="w-full md:w-1/4">
+                    <label className="block text-xs font-semibold text-gray-600 mb-1">Username Toko*</label>
+                    <input
+                      type="text"
+                      value={task.username}
+                      onChange={(e) => updateTask(index, 'username', e.target.value)}
+                      placeholder="Misal: iboxofficial"
+                      className="w-full border border-gray-300 rounded p-2 focus:border-green-500 text-sm"
+                    />
+                  </div>
 
+                  <div className="w-full md:w-1/4">
+                    <label className="block text-xs font-semibold text-gray-600 mb-1">Cari Produk (Opsional)</label>
+                    <input
+                      type="text"
+                      value={task.keyword}
+                      onChange={(e) => updateTask(index, 'keyword', e.target.value)}
+                      placeholder="Misal: iPhone 16"
+                      className="w-full border border-gray-300 rounded p-2 focus:border-green-500 text-sm"
+                    />
+                  </div>
 
+                  <div className="w-full md:w-1/5">
+                    <label className="block text-xs font-semibold text-gray-600 mb-1">Target Jumlah</label>
+                    <input
+                      type="number"
+                      value={task.limit}
+                      onChange={(e) => updateTask(index, 'limit', parseInt(e.target.value))}
+                      disabled={task.isAll}
+                      className={`w-full border rounded p-2 text-sm ${task.isAll ? 'bg-gray-200 text-gray-400' : 'border-gray-300 focus:border-green-500'}`}
+                    />
+                  </div>
+
+                  <div className="w-full md:w-auto flex items-center mb-2 ml-2">
+                    <input
+                      type="checkbox"
+                      checked={task.isAll}
+                      onChange={(e) => updateTask(index, 'isAll', e.target.checked)}
+                      className="mr-2 h-4 w-4 text-green-600 cursor-pointer"
+                    />
+                    <label className="text-sm text-gray-700 cursor-pointer" onClick={() => updateTask(index, 'isAll', !task.isAll)}>
+                      Ambil Semua (Get All)
+                    </label>
+                  </div>
+                </div>
+              ))}
+
+              <button onClick={addTask} className="text-sm text-blue-600 font-bold mb-4 hover:underline">
+                + Tambah Toko Lain
+              </button>
+            </div>
+          )}
+
+          <button
+            onClick={handleStoreScrape}
+            disabled={isStoreLoading}
+            className={`w-full text-white font-bold py-3 px-4 rounded-md transition-colors ${
+              isStoreLoading ? "bg-green-400 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"
+            }`}
+          >
+            {isStoreLoading ? (isSmartMode ? "AI Sedang Bekerja..." : "Memproses Data Toko...") : (isSmartMode ? "Mulai Scraping dengan AI" : "Mulai Tarik Produk Toko")}
+          </button>
+        </div>
 
         {/* ================= PANEL AI ASSISTANT ================= */}
         <div className="bg-white p-6 rounded-lg shadow-md border-t-4 border-blue-500">
@@ -321,7 +368,6 @@ export default function App() {
             <div className="mt-6 bg-gray-50 border border-gray-200 rounded-lg p-6">
               <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4 border-b pb-2">Hasil Analisis Gemini</h3>
               <div className="text-gray-800 text-sm leading-relaxed">
-                {/* Pembaca Markdown dengan Styling Tailwind Kustom */}
                 <ReactMarkdown
                   components={{
                     h1: ({node, ...props}) => <h1 className="text-xl font-bold mt-4 mb-2 text-blue-800" {...props} />,
@@ -341,10 +387,9 @@ export default function App() {
           )}
         </div>
 
-{/* ================= PANEL HASIL SCRAPING (DROPDOWN) ================= */}
+        {/* ================= PANEL HASIL SCRAPING (DROPDOWN) ================= */}
         {scrapedData.length > 0 && (
           <div className="space-y-4">
-            {/* Header Dropdown */}
             <div 
               onClick={() => setShowResults(!showResults)}
               className="flex justify-between items-center bg-white p-4 rounded-lg shadow-sm border-l-4 border-orange-500 cursor-pointer hover:bg-orange-50 transition-colors"
@@ -357,7 +402,6 @@ export default function App() {
               </span>
             </div>
             
-            {/* Isi Dropdown (Hanya dirender jika showResults bernilai true) */}
             {showResults && (
               <div className="grid grid-cols-1 gap-6 transition-all duration-300 ease-in-out">
                 {scrapedData.map((item, idx) => (

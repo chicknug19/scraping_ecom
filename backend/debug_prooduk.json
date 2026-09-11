@@ -527,9 +527,9 @@
                 "item_id": 43422527974,
                 "status": 1,
                 "current_promotion_reserved_stock": null,
-                "name": "Silver,1TB",
+                "name": "Silver,512GB",
                 "promotion_id": 0,
-                "price": 3424900000000,
+                "price": 2949900000000,
                 "price_stocks": [
                     {
                         "allocated_stock": null,
@@ -542,14 +542,14 @@
                 "extinfo": {
                     "tier_index": [
                         0,
-                        2
+                        1
                     ],
                     "is_pre_order": false,
                     "estimated_days": 2,
                     "sku_image": ""
                 },
                 "price_before_discount": 0,
-                "model_id": 281832521387,
+                "model_id": 281832521386,
                 "stock": null,
                 "has_gimmick_tag": false,
                 "key_measurement": null,
@@ -592,6 +592,154 @@
                 },
                 "price_before_discount": 2499900000000,
                 "model_id": 281832521388,
+                "stock": null,
+                "has_gimmick_tag": false,
+                "key_measurement": null,
+                "sold": null,
+                "is_lowest_price_at_shopee": false,
+                "name_tr": null,
+                "is_clickable": false,
+                "is_grayout": true,
+                "has_stock": false
+            },
+            {
+                "item_id": 43422527974,
+                "status": 1,
+                "current_promotion_reserved_stock": null,
+                "name": "Silver,1TB",
+                "promotion_id": 0,
+                "price": 3424900000000,
+                "price_stocks": [
+                    {
+                        "allocated_stock": null,
+                        "stock_breakdown_by_location": null,
+                        "promotion_type": 0
+                    }
+                ],
+                "current_promotion_has_reserve_stock": false,
+                "normal_stock": null,
+                "extinfo": {
+                    "tier_index": [
+                        0,
+                        2
+                    ],
+                    "is_pre_order": false,
+                    "estimated_days": 2,
+                    "sku_image": ""
+                },
+                "price_before_discount": 0,
+                "model_id": 281832521387,
+                "stock": null,
+                "has_gimmick_tag": false,
+                "key_measurement": null,
+                "sold": null,
+                "is_lowest_price_at_shopee": false,
+                "name_tr": null,
+                "is_clickable": false,
+                "is_grayout": true,
+                "has_stock": false
+            },
+            {
+                "item_id": 43422527974,
+                "status": 1,
+                "current_promotion_reserved_stock": null,
+                "name": "Cosmic Orange,1TB",
+                "promotion_id": 0,
+                "price": 3424900000000,
+                "price_stocks": [
+                    {
+                        "allocated_stock": null,
+                        "stock_breakdown_by_location": null,
+                        "promotion_type": 0
+                    }
+                ],
+                "current_promotion_has_reserve_stock": false,
+                "normal_stock": null,
+                "extinfo": {
+                    "tier_index": [
+                        1,
+                        2
+                    ],
+                    "is_pre_order": false,
+                    "estimated_days": 2,
+                    "sku_image": ""
+                },
+                "price_before_discount": 0,
+                "model_id": 281832521390,
+                "stock": null,
+                "has_gimmick_tag": false,
+                "key_measurement": null,
+                "sold": null,
+                "is_lowest_price_at_shopee": false,
+                "name_tr": null,
+                "is_clickable": false,
+                "is_grayout": true,
+                "has_stock": false
+            },
+            {
+                "item_id": 43422527974,
+                "status": 1,
+                "current_promotion_reserved_stock": null,
+                "name": "Deep Blue,512GB",
+                "promotion_id": 0,
+                "price": 2949900000000,
+                "price_stocks": [
+                    {
+                        "allocated_stock": null,
+                        "stock_breakdown_by_location": null,
+                        "promotion_type": 0
+                    }
+                ],
+                "current_promotion_has_reserve_stock": false,
+                "normal_stock": null,
+                "extinfo": {
+                    "tier_index": [
+                        2,
+                        1
+                    ],
+                    "is_pre_order": false,
+                    "estimated_days": 2,
+                    "sku_image": ""
+                },
+                "price_before_discount": 0,
+                "model_id": 281832521392,
+                "stock": null,
+                "has_gimmick_tag": false,
+                "key_measurement": null,
+                "sold": null,
+                "is_lowest_price_at_shopee": false,
+                "name_tr": null,
+                "is_clickable": false,
+                "is_grayout": true,
+                "has_stock": false
+            },
+            {
+                "item_id": 43422527974,
+                "status": 1,
+                "current_promotion_reserved_stock": null,
+                "name": "Deep Blue,1TB",
+                "promotion_id": 0,
+                "price": 3424900000000,
+                "price_stocks": [
+                    {
+                        "allocated_stock": null,
+                        "stock_breakdown_by_location": null,
+                        "promotion_type": 0
+                    }
+                ],
+                "current_promotion_has_reserve_stock": false,
+                "normal_stock": null,
+                "extinfo": {
+                    "tier_index": [
+                        2,
+                        2
+                    ],
+                    "is_pre_order": false,
+                    "estimated_days": 2,
+                    "sku_image": ""
+                },
+                "price_before_discount": 0,
+                "model_id": 281832521393,
                 "stock": null,
                 "has_gimmick_tag": false,
                 "key_measurement": null,
@@ -690,117 +838,6 @@
                 "item_id": 43422527974,
                 "status": 1,
                 "current_promotion_reserved_stock": null,
-                "name": "Deep Blue,512GB",
-                "promotion_id": 0,
-                "price": 2949900000000,
-                "price_stocks": [
-                    {
-                        "allocated_stock": null,
-                        "stock_breakdown_by_location": null,
-                        "promotion_type": 0
-                    }
-                ],
-                "current_promotion_has_reserve_stock": false,
-                "normal_stock": null,
-                "extinfo": {
-                    "tier_index": [
-                        2,
-                        1
-                    ],
-                    "is_pre_order": false,
-                    "estimated_days": 2,
-                    "sku_image": ""
-                },
-                "price_before_discount": 0,
-                "model_id": 281832521392,
-                "stock": null,
-                "has_gimmick_tag": false,
-                "key_measurement": null,
-                "sold": null,
-                "is_lowest_price_at_shopee": false,
-                "name_tr": null,
-                "is_clickable": false,
-                "is_grayout": true,
-                "has_stock": false
-            },
-            {
-                "item_id": 43422527974,
-                "status": 1,
-                "current_promotion_reserved_stock": null,
-                "name": "Cosmic Orange,1TB",
-                "promotion_id": 0,
-                "price": 3424900000000,
-                "price_stocks": [
-                    {
-                        "allocated_stock": null,
-                        "stock_breakdown_by_location": null,
-                        "promotion_type": 0
-                    }
-                ],
-                "current_promotion_has_reserve_stock": false,
-                "normal_stock": null,
-                "extinfo": {
-                    "tier_index": [
-                        1,
-                        2
-                    ],
-                    "is_pre_order": false,
-                    "estimated_days": 2,
-                    "sku_image": ""
-                },
-                "price_before_discount": 0,
-                "model_id": 281832521390,
-                "stock": null,
-                "has_gimmick_tag": false,
-                "key_measurement": null,
-                "sold": null,
-                "is_lowest_price_at_shopee": false,
-                "name_tr": null,
-                "is_clickable": false,
-                "is_grayout": true,
-                "has_stock": false
-            },
-            {
-                "item_id": 43422527974,
-                "status": 1,
-                "current_promotion_reserved_stock": null,
-                "name": "Deep Blue,1TB",
-                "promotion_id": 0,
-                "price": 3424900000000,
-                "price_stocks": [
-                    {
-                        "allocated_stock": null,
-                        "stock_breakdown_by_location": null,
-                        "promotion_type": 0
-                    }
-                ],
-                "current_promotion_has_reserve_stock": false,
-                "normal_stock": null,
-                "extinfo": {
-                    "tier_index": [
-                        2,
-                        2
-                    ],
-                    "is_pre_order": false,
-                    "estimated_days": 2,
-                    "sku_image": ""
-                },
-                "price_before_discount": 0,
-                "model_id": 281832521393,
-                "stock": null,
-                "has_gimmick_tag": false,
-                "key_measurement": null,
-                "sold": null,
-                "is_lowest_price_at_shopee": false,
-                "name_tr": null,
-                "is_clickable": false,
-                "is_grayout": true,
-                "has_stock": false
-            },
-            {
-                "item_id": 43422527974,
-                "status": 1,
-                "current_promotion_reserved_stock": null,
                 "name": "Silver,256GB",
                 "promotion_id": 499888127484322,
                 "price": 2299900000000,
@@ -838,43 +875,6 @@
                 "is_clickable": true,
                 "is_grayout": false,
                 "has_stock": true
-            },
-            {
-                "item_id": 43422527974,
-                "status": 1,
-                "current_promotion_reserved_stock": null,
-                "name": "Silver,512GB",
-                "promotion_id": 0,
-                "price": 2949900000000,
-                "price_stocks": [
-                    {
-                        "allocated_stock": null,
-                        "stock_breakdown_by_location": null,
-                        "promotion_type": 0
-                    }
-                ],
-                "current_promotion_has_reserve_stock": false,
-                "normal_stock": null,
-                "extinfo": {
-                    "tier_index": [
-                        0,
-                        1
-                    ],
-                    "is_pre_order": false,
-                    "estimated_days": 2,
-                    "sku_image": ""
-                },
-                "price_before_discount": 0,
-                "model_id": 281832521386,
-                "stock": null,
-                "has_gimmick_tag": false,
-                "key_measurement": null,
-                "sold": null,
-                "is_lowest_price_at_shopee": false,
-                "name_tr": null,
-                "is_clickable": false,
-                "is_grayout": true,
-                "has_stock": false
             }
         ],
         "tier_variations": [
@@ -980,8 +980,8 @@
         "title_tr": null,
         "description_tr": null,
         "rich_text_description_tr": null,
-        "stock_display": "10",
-        "max_quantity_display": "Tersedia 10",
+        "stock_display": "8",
+        "max_quantity_display": "Tersedia 8",
         "disclaimer": null
     },
     "shop_name_api": "Footer",
@@ -1514,9 +1514,9 @@
                     "item_id": 43422527974,
                     "status": 1,
                     "current_promotion_reserved_stock": null,
-                    "name": "Silver,1TB",
+                    "name": "Silver,512GB",
                     "promotion_id": 0,
-                    "price": 3424900000000,
+                    "price": 2949900000000,
                     "price_stocks": [
                         {
                             "allocated_stock": null,
@@ -1529,14 +1529,14 @@
                     "extinfo": {
                         "tier_index": [
                             0,
-                            2
+                            1
                         ],
                         "is_pre_order": false,
                         "estimated_days": 2,
                         "sku_image": ""
                     },
                     "price_before_discount": 0,
-                    "model_id": 281832521387,
+                    "model_id": 281832521386,
                     "stock": null,
                     "has_gimmick_tag": false,
                     "key_measurement": null,
@@ -1579,6 +1579,154 @@
                     },
                     "price_before_discount": 2499900000000,
                     "model_id": 281832521388,
+                    "stock": null,
+                    "has_gimmick_tag": false,
+                    "key_measurement": null,
+                    "sold": null,
+                    "is_lowest_price_at_shopee": false,
+                    "name_tr": null,
+                    "is_clickable": false,
+                    "is_grayout": true,
+                    "has_stock": false
+                },
+                {
+                    "item_id": 43422527974,
+                    "status": 1,
+                    "current_promotion_reserved_stock": null,
+                    "name": "Silver,1TB",
+                    "promotion_id": 0,
+                    "price": 3424900000000,
+                    "price_stocks": [
+                        {
+                            "allocated_stock": null,
+                            "stock_breakdown_by_location": null,
+                            "promotion_type": 0
+                        }
+                    ],
+                    "current_promotion_has_reserve_stock": false,
+                    "normal_stock": null,
+                    "extinfo": {
+                        "tier_index": [
+                            0,
+                            2
+                        ],
+                        "is_pre_order": false,
+                        "estimated_days": 2,
+                        "sku_image": ""
+                    },
+                    "price_before_discount": 0,
+                    "model_id": 281832521387,
+                    "stock": null,
+                    "has_gimmick_tag": false,
+                    "key_measurement": null,
+                    "sold": null,
+                    "is_lowest_price_at_shopee": false,
+                    "name_tr": null,
+                    "is_clickable": false,
+                    "is_grayout": true,
+                    "has_stock": false
+                },
+                {
+                    "item_id": 43422527974,
+                    "status": 1,
+                    "current_promotion_reserved_stock": null,
+                    "name": "Cosmic Orange,1TB",
+                    "promotion_id": 0,
+                    "price": 3424900000000,
+                    "price_stocks": [
+                        {
+                            "allocated_stock": null,
+                            "stock_breakdown_by_location": null,
+                            "promotion_type": 0
+                        }
+                    ],
+                    "current_promotion_has_reserve_stock": false,
+                    "normal_stock": null,
+                    "extinfo": {
+                        "tier_index": [
+                            1,
+                            2
+                        ],
+                        "is_pre_order": false,
+                        "estimated_days": 2,
+                        "sku_image": ""
+                    },
+                    "price_before_discount": 0,
+                    "model_id": 281832521390,
+                    "stock": null,
+                    "has_gimmick_tag": false,
+                    "key_measurement": null,
+                    "sold": null,
+                    "is_lowest_price_at_shopee": false,
+                    "name_tr": null,
+                    "is_clickable": false,
+                    "is_grayout": true,
+                    "has_stock": false
+                },
+                {
+                    "item_id": 43422527974,
+                    "status": 1,
+                    "current_promotion_reserved_stock": null,
+                    "name": "Deep Blue,512GB",
+                    "promotion_id": 0,
+                    "price": 2949900000000,
+                    "price_stocks": [
+                        {
+                            "allocated_stock": null,
+                            "stock_breakdown_by_location": null,
+                            "promotion_type": 0
+                        }
+                    ],
+                    "current_promotion_has_reserve_stock": false,
+                    "normal_stock": null,
+                    "extinfo": {
+                        "tier_index": [
+                            2,
+                            1
+                        ],
+                        "is_pre_order": false,
+                        "estimated_days": 2,
+                        "sku_image": ""
+                    },
+                    "price_before_discount": 0,
+                    "model_id": 281832521392,
+                    "stock": null,
+                    "has_gimmick_tag": false,
+                    "key_measurement": null,
+                    "sold": null,
+                    "is_lowest_price_at_shopee": false,
+                    "name_tr": null,
+                    "is_clickable": false,
+                    "is_grayout": true,
+                    "has_stock": false
+                },
+                {
+                    "item_id": 43422527974,
+                    "status": 1,
+                    "current_promotion_reserved_stock": null,
+                    "name": "Deep Blue,1TB",
+                    "promotion_id": 0,
+                    "price": 3424900000000,
+                    "price_stocks": [
+                        {
+                            "allocated_stock": null,
+                            "stock_breakdown_by_location": null,
+                            "promotion_type": 0
+                        }
+                    ],
+                    "current_promotion_has_reserve_stock": false,
+                    "normal_stock": null,
+                    "extinfo": {
+                        "tier_index": [
+                            2,
+                            2
+                        ],
+                        "is_pre_order": false,
+                        "estimated_days": 2,
+                        "sku_image": ""
+                    },
+                    "price_before_discount": 0,
+                    "model_id": 281832521393,
                     "stock": null,
                     "has_gimmick_tag": false,
                     "key_measurement": null,
@@ -1677,117 +1825,6 @@
                     "item_id": 43422527974,
                     "status": 1,
                     "current_promotion_reserved_stock": null,
-                    "name": "Deep Blue,512GB",
-                    "promotion_id": 0,
-                    "price": 2949900000000,
-                    "price_stocks": [
-                        {
-                            "allocated_stock": null,
-                            "stock_breakdown_by_location": null,
-                            "promotion_type": 0
-                        }
-                    ],
-                    "current_promotion_has_reserve_stock": false,
-                    "normal_stock": null,
-                    "extinfo": {
-                        "tier_index": [
-                            2,
-                            1
-                        ],
-                        "is_pre_order": false,
-                        "estimated_days": 2,
-                        "sku_image": ""
-                    },
-                    "price_before_discount": 0,
-                    "model_id": 281832521392,
-                    "stock": null,
-                    "has_gimmick_tag": false,
-                    "key_measurement": null,
-                    "sold": null,
-                    "is_lowest_price_at_shopee": false,
-                    "name_tr": null,
-                    "is_clickable": false,
-                    "is_grayout": true,
-                    "has_stock": false
-                },
-                {
-                    "item_id": 43422527974,
-                    "status": 1,
-                    "current_promotion_reserved_stock": null,
-                    "name": "Cosmic Orange,1TB",
-                    "promotion_id": 0,
-                    "price": 3424900000000,
-                    "price_stocks": [
-                        {
-                            "allocated_stock": null,
-                            "stock_breakdown_by_location": null,
-                            "promotion_type": 0
-                        }
-                    ],
-                    "current_promotion_has_reserve_stock": false,
-                    "normal_stock": null,
-                    "extinfo": {
-                        "tier_index": [
-                            1,
-                            2
-                        ],
-                        "is_pre_order": false,
-                        "estimated_days": 2,
-                        "sku_image": ""
-                    },
-                    "price_before_discount": 0,
-                    "model_id": 281832521390,
-                    "stock": null,
-                    "has_gimmick_tag": false,
-                    "key_measurement": null,
-                    "sold": null,
-                    "is_lowest_price_at_shopee": false,
-                    "name_tr": null,
-                    "is_clickable": false,
-                    "is_grayout": true,
-                    "has_stock": false
-                },
-                {
-                    "item_id": 43422527974,
-                    "status": 1,
-                    "current_promotion_reserved_stock": null,
-                    "name": "Deep Blue,1TB",
-                    "promotion_id": 0,
-                    "price": 3424900000000,
-                    "price_stocks": [
-                        {
-                            "allocated_stock": null,
-                            "stock_breakdown_by_location": null,
-                            "promotion_type": 0
-                        }
-                    ],
-                    "current_promotion_has_reserve_stock": false,
-                    "normal_stock": null,
-                    "extinfo": {
-                        "tier_index": [
-                            2,
-                            2
-                        ],
-                        "is_pre_order": false,
-                        "estimated_days": 2,
-                        "sku_image": ""
-                    },
-                    "price_before_discount": 0,
-                    "model_id": 281832521393,
-                    "stock": null,
-                    "has_gimmick_tag": false,
-                    "key_measurement": null,
-                    "sold": null,
-                    "is_lowest_price_at_shopee": false,
-                    "name_tr": null,
-                    "is_clickable": false,
-                    "is_grayout": true,
-                    "has_stock": false
-                },
-                {
-                    "item_id": 43422527974,
-                    "status": 1,
-                    "current_promotion_reserved_stock": null,
                     "name": "Silver,256GB",
                     "promotion_id": 499888127484322,
                     "price": 2299900000000,
@@ -1825,43 +1862,6 @@
                     "is_clickable": true,
                     "is_grayout": false,
                     "has_stock": true
-                },
-                {
-                    "item_id": 43422527974,
-                    "status": 1,
-                    "current_promotion_reserved_stock": null,
-                    "name": "Silver,512GB",
-                    "promotion_id": 0,
-                    "price": 2949900000000,
-                    "price_stocks": [
-                        {
-                            "allocated_stock": null,
-                            "stock_breakdown_by_location": null,
-                            "promotion_type": 0
-                        }
-                    ],
-                    "current_promotion_has_reserve_stock": false,
-                    "normal_stock": null,
-                    "extinfo": {
-                        "tier_index": [
-                            0,
-                            1
-                        ],
-                        "is_pre_order": false,
-                        "estimated_days": 2,
-                        "sku_image": ""
-                    },
-                    "price_before_discount": 0,
-                    "model_id": 281832521386,
-                    "stock": null,
-                    "has_gimmick_tag": false,
-                    "key_measurement": null,
-                    "sold": null,
-                    "is_lowest_price_at_shopee": false,
-                    "name_tr": null,
-                    "is_clickable": false,
-                    "is_grayout": true,
-                    "has_stock": false
                 }
             ],
             "tier_variations": [
@@ -1967,8 +1967,8 @@
             "title_tr": null,
             "description_tr": null,
             "rich_text_description_tr": null,
-            "stock_display": "10",
-            "max_quantity_display": "Tersedia 10",
+            "stock_display": "8",
+            "max_quantity_display": "Tersedia 8",
             "disclaimer": null
         },
         "account": {
@@ -1998,15 +1998,6 @@
                 "vid": "id-11110105-6vdvd-mfcd4gn9gcgd1f",
                 "formats": [
                     {
-                        "format": 1600408,
-                        "defn": "V360P",
-                        "profile": "MP4",
-                        "path": "api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004081775177799.mp4",
-                        "url": "https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004081775177799.mp4",
-                        "width": 640,
-                        "height": 360
-                    },
-                    {
                         "format": 1600393,
                         "defn": "V360P",
                         "profile": "MP4",
@@ -2016,13 +2007,13 @@
                         "height": 360
                     },
                     {
-                        "format": 1600673,
-                        "defn": "V540P",
+                        "format": 1600408,
+                        "defn": "V360P",
                         "profile": "MP4",
-                        "path": "api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16006731774288412.mp4",
-                        "url": "https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16006731774288412.mp4",
-                        "width": 960,
-                        "height": 540
+                        "path": "api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004081775177799.mp4",
+                        "url": "https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004081775177799.mp4",
+                        "width": 640,
+                        "height": 360
                     },
                     {
                         "format": 1600671,
@@ -2030,6 +2021,15 @@
                         "profile": "MP4",
                         "path": "api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16006711773702845.mp4",
                         "url": "https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16006711773702845.mp4",
+                        "width": 960,
+                        "height": 540
+                    },
+                    {
+                        "format": 1600673,
+                        "defn": "V540P",
+                        "profile": "MP4",
+                        "path": "api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16006731774288412.mp4",
+                        "url": "https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16006731774288412.mp4",
                         "width": 960,
                         "height": 540
                     },
@@ -2115,7 +2115,7 @@
                     "width": 960,
                     "height": 540
                 },
-                "mms_data": "{\"vid\":\"id-11110105-6vdvd-mfcd4gn9gcgd1f\",\"biz\":107,\"duration\":53392,\"create_time\":1759395365,\"update_time\":1759395373,\"serviceID\":2,\"cover\":\"https://down-tx-id.img.susercontent.com/id-11110105-6vdvd-mfcd4gn9gcgd1f_cover\",\"cover_list\":[],\"formats\":[{\"format\":1600408,\"defn\":\"V360P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004081775177799.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004081775177799.mp4\",\"width\":640,\"height\":360,\"bitrate\":129072,\"abitrate\":32100,\"size\":1103896,\"fps\":25,\"duration\":53040,\"update_time\":1775177810,\"codec\":\"H264\"},{\"format\":1600393,\"defn\":\"V360P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003931786902314.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003931786902314.mp4\",\"width\":640,\"height\":360,\"bitrate\":125035,\"abitrate\":32100,\"size\":1077170,\"fps\":25,\"duration\":53040,\"update_time\":1786902321,\"codec\":\"H264\"},{\"format\":1600673,\"defn\":\"V540P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16006731774288412.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16006731774288412.mp4\",\"width\":960,\"height\":540,\"bitrate\":333045,\"abitrate\":32100,\"size\":2454564,\"fps\":25,\"duration\":53040,\"update_time\":1774288429,\"codec\":\"H264\"},{\"format\":1600671,\"defn\":\"V540P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16006711773702845.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16006711773702845.mp4\",\"width\":960,\"height\":540,\"bitrate\":185904,\"abitrate\":32100,\"size\":1479753,\"fps\":25,\"duration\":53040,\"update_time\":1773702863,\"codec\":\"H264\"},{\"format\":1600394,\"defn\":\"V540P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003941786902315.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003941786902315.mp4\",\"width\":960,\"height\":540,\"bitrate\":203679,\"abitrate\":32100,\"size\":1598566,\"fps\":25,\"duration\":53040,\"update_time\":1786902330,\"codec\":\"H264\"},{\"format\":1600409,\"defn\":\"V540P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004091775177799.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004091775177799.mp4\",\"width\":960,\"height\":540,\"bitrate\":199763,\"abitrate\":32100,\"size\":1572615,\"fps\":25,\"duration\":53040,\"update_time\":1775177823,\"codec\":\"H264\"},{\"format\":1600008,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16000081759395370.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16000081759395370.mp4\",\"width\":1280,\"height\":720,\"bitrate\":484963,\"abitrate\":127111,\"size\":4101147,\"fps\":25,\"duration\":53040,\"update_time\":1759395397,\"codec\":\"H264\"},{\"format\":1600325,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003251773702845.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003251773702845.mp4\",\"width\":1280,\"height\":720,\"bitrate\":494889,\"abitrate\":48138,\"size\":3651184,\"fps\":29.99943,\"duration\":53034,\"update_time\":1773702873,\"codec\":\"H264\"},{\"format\":1600395,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003951786902314.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003951786902314.mp4\",\"width\":1280,\"height\":720,\"bitrate\":372570,\"abitrate\":48138,\"size\":2824617,\"fps\":25,\"duration\":53040,\"update_time\":1786902336,\"codec\":\"H264\"},{\"format\":1600396,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003961786902315.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003961786902315.mp4\",\"width\":1280,\"height\":720,\"bitrate\":560771,\"abitrate\":48138,\"size\":4089927,\"fps\":30.00019,\"duration\":53033,\"update_time\":1786902342,\"codec\":\"H264\"},{\"format\":1600410,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004101775177799.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004101775177799.mp4\",\"width\":1280,\"height\":720,\"bitrate\":400187,\"abitrate\":48138,\"size\":3007725,\"fps\":25,\"duration\":53040,\"update_time\":1775177839,\"codec\":\"H264\"},{\"format\":1600411,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004111775177799.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004111775177799.mp4\",\"width\":1280,\"height\":720,\"bitrate\":553562,\"abitrate\":48138,\"size\":4042148,\"fps\":30.00019,\"duration\":53033,\"update_time\":1775177830,\"codec\":\"H264\"}],\"default_format\":{\"format\":1600323,\"defn\":\"V540P\",\"profile\":\"MP4\",\"path\":\"\",\"url\":\"https://mms.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.default.mp4\",\"width\":960,\"height\":540,\"bitrate\":285912,\"abitrate\":32224,\"size\":2153545,\"fps\":25,\"duration\":53040,\"update_time\":1759395405,\"codec\":\"H264\"},\"extend_formats\":{\"H265\":[{\"format\":1600315,\"defn\":\"V360P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003151773702832.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003151773702832.mp4\",\"width\":640,\"height\":360,\"bitrate\":115144,\"abitrate\":32100,\"size\":1014585,\"fps\":25,\"duration\":53040,\"update_time\":1773702845,\"codec\":\"H265\"},{\"format\":1600397,\"defn\":\"V360P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003971786902301.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003971786902301.mp4\",\"width\":640,\"height\":360,\"bitrate\":97676,\"abitrate\":32100,\"size\":899390,\"fps\":25,\"duration\":53040,\"update_time\":1786902314,\"codec\":\"H265\"},{\"format\":1600412,\"defn\":\"V360P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004121775177781.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004121775177781.mp4\",\"width\":640,\"height\":360,\"bitrate\":88654,\"abitrate\":32100,\"size\":839561,\"fps\":25,\"duration\":53040,\"update_time\":1775177797,\"codec\":\"H265\"},{\"format\":1600316,\"defn\":\"V540P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003161773702845.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003161773702845.mp4\",\"width\":960,\"height\":540,\"bitrate\":187388,\"abitrate\":32100,\"size\":1493224,\"fps\":25,\"duration\":53040,\"update_time\":1773702865,\"codec\":\"H265\"},{\"format\":1600398,\"defn\":\"V540P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003981786902315.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003981786902315.mp4\",\"width\":960,\"height\":540,\"bitrate\":147889,\"abitrate\":32100,\"size\":1232298,\"fps\":25,\"duration\":53040,\"update_time\":1786902334,\"codec\":\"H265\"},{\"format\":1600413,\"defn\":\"V540P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004131775177799.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004131775177799.mp4\",\"width\":960,\"height\":540,\"bitrate\":137338,\"abitrate\":32100,\"size\":1162345,\"fps\":25,\"duration\":53040,\"update_time\":1775177818,\"codec\":\"H265\"},{\"format\":1600309,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003091759395398.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003091759395398.mp4\",\"width\":1280,\"height\":720,\"bitrate\":227142,\"abitrate\":127111,\"size\":2396740,\"fps\":25,\"duration\":53040,\"update_time\":1759395437,\"codec\":\"H265\"},{\"format\":1600741,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16007411773980514.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16007411773980514.mp4\",\"width\":1280,\"height\":720,\"bitrate\":227669,\"abitrate\":48138,\"size\":1884747,\"fps\":29.99943,\"duration\":53034,\"update_time\":1773980544,\"codec\":\"H265\"},{\"format\":1600317,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003171773702845.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003171773702845.mp4\",\"width\":1280,\"height\":720,\"bitrate\":292437,\"abitrate\":48138,\"size\":2313843,\"fps\":29.99943,\"duration\":53034,\"update_time\":1773702876,\"codec\":\"H265\"},{\"format\":1600318,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003181773702845.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003181773702845.mp4\",\"width\":1280,\"height\":720,\"bitrate\":254271,\"abitrate\":48138,\"size\":2060987,\"fps\":29.99943,\"duration\":53034,\"update_time\":1773702876,\"codec\":\"H265\"},{\"format\":1600742,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16007421773980544.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16007421773980544.mp4\",\"width\":1280,\"height\":720,\"bitrate\":213740,\"abitrate\":48138,\"size\":1792466,\"fps\":29.99943,\"duration\":53034,\"update_time\":1773980581,\"codec\":\"H265\"},{\"format\":1600414,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004141775177799.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004141775177799.mp4\",\"width\":1280,\"height\":720,\"bitrate\":238246,\"abitrate\":48138,\"size\":1955779,\"fps\":30.00019,\"duration\":53033,\"update_time\":1775177828,\"codec\":\"H265\"},{\"format\":1600743,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16007431775177799.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16007431775177799.mp4\",\"width\":1280,\"height\":720,\"bitrate\":205981,\"abitrate\":48138,\"size\":1741889,\"fps\":30.00019,\"duration\":53033,\"update_time\":1775177829,\"codec\":\"H265\"},{\"format\":1600399,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003991786902315.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003991786902315.mp4\",\"width\":1280,\"height\":720,\"bitrate\":259529,\"abitrate\":48138,\"size\":2096889,\"fps\":30.00019,\"duration\":53033,\"update_time\":1786902354,\"codec\":\"H265\"},{\"format\":1600415,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004151775177799.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004151775177799.mp4\",\"width\":1280,\"height\":720,\"bitrate\":230052,\"abitrate\":48138,\"size\":1901460,\"fps\":30.00019,\"duration\":53033,\"update_time\":1775177831,\"codec\":\"H265\"},{\"format\":1600400,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004001786902314.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004001786902314.mp4\",\"width\":1280,\"height\":720,\"bitrate\":256572,\"abitrate\":48138,\"size\":2077292,\"fps\":30.00019,\"duration\":53033,\"update_time\":1786902336,\"codec\":\"H265\"},{\"format\":1600744,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16007441775177799.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16007441775177799.mp4\",\"width\":1280,\"height\":720,\"bitrate\":194059,\"abitrate\":48138,\"size\":1662858,\"fps\":30.00019,\"duration\":53033,\"update_time\":1775177825,\"codec\":\"H265\"}]},\"ab_test\":\"\"}",
+                "mms_data": "{\"vid\":\"id-11110105-6vdvd-mfcd4gn9gcgd1f\",\"biz\":107,\"duration\":53392,\"create_time\":1759395365,\"update_time\":1759395373,\"serviceID\":2,\"cover\":\"https://down-tx-id.img.susercontent.com/id-11110105-6vdvd-mfcd4gn9gcgd1f_cover\",\"cover_list\":[],\"formats\":[{\"format\":1600393,\"defn\":\"V360P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003931786902314.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003931786902314.mp4\",\"width\":640,\"height\":360,\"bitrate\":125035,\"abitrate\":32100,\"size\":1077170,\"fps\":25,\"duration\":53040,\"update_time\":1786902321,\"codec\":\"H264\"},{\"format\":1600408,\"defn\":\"V360P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004081775177799.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004081775177799.mp4\",\"width\":640,\"height\":360,\"bitrate\":129072,\"abitrate\":32100,\"size\":1103896,\"fps\":25,\"duration\":53040,\"update_time\":1775177810,\"codec\":\"H264\"},{\"format\":1600671,\"defn\":\"V540P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16006711773702845.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16006711773702845.mp4\",\"width\":960,\"height\":540,\"bitrate\":185904,\"abitrate\":32100,\"size\":1479753,\"fps\":25,\"duration\":53040,\"update_time\":1773702863,\"codec\":\"H264\"},{\"format\":1600673,\"defn\":\"V540P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16006731774288412.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16006731774288412.mp4\",\"width\":960,\"height\":540,\"bitrate\":333045,\"abitrate\":32100,\"size\":2454564,\"fps\":25,\"duration\":53040,\"update_time\":1774288429,\"codec\":\"H264\"},{\"format\":1600394,\"defn\":\"V540P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003941786902315.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003941786902315.mp4\",\"width\":960,\"height\":540,\"bitrate\":203679,\"abitrate\":32100,\"size\":1598566,\"fps\":25,\"duration\":53040,\"update_time\":1786902330,\"codec\":\"H264\"},{\"format\":1600409,\"defn\":\"V540P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004091775177799.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004091775177799.mp4\",\"width\":960,\"height\":540,\"bitrate\":199763,\"abitrate\":32100,\"size\":1572615,\"fps\":25,\"duration\":53040,\"update_time\":1775177823,\"codec\":\"H264\"},{\"format\":1600008,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16000081759395370.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16000081759395370.mp4\",\"width\":1280,\"height\":720,\"bitrate\":484963,\"abitrate\":127111,\"size\":4101147,\"fps\":25,\"duration\":53040,\"update_time\":1759395397,\"codec\":\"H264\"},{\"format\":1600325,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003251773702845.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003251773702845.mp4\",\"width\":1280,\"height\":720,\"bitrate\":494889,\"abitrate\":48138,\"size\":3651184,\"fps\":29.99943,\"duration\":53034,\"update_time\":1773702873,\"codec\":\"H264\"},{\"format\":1600395,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003951786902314.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003951786902314.mp4\",\"width\":1280,\"height\":720,\"bitrate\":372570,\"abitrate\":48138,\"size\":2824617,\"fps\":25,\"duration\":53040,\"update_time\":1786902336,\"codec\":\"H264\"},{\"format\":1600396,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003961786902315.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003961786902315.mp4\",\"width\":1280,\"height\":720,\"bitrate\":560771,\"abitrate\":48138,\"size\":4089927,\"fps\":30.00019,\"duration\":53033,\"update_time\":1786902342,\"codec\":\"H264\"},{\"format\":1600410,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004101775177799.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004101775177799.mp4\",\"width\":1280,\"height\":720,\"bitrate\":400187,\"abitrate\":48138,\"size\":3007725,\"fps\":25,\"duration\":53040,\"update_time\":1775177839,\"codec\":\"H264\"},{\"format\":1600411,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004111775177799.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004111775177799.mp4\",\"width\":1280,\"height\":720,\"bitrate\":553562,\"abitrate\":48138,\"size\":4042148,\"fps\":30.00019,\"duration\":53033,\"update_time\":1775177830,\"codec\":\"H264\"}],\"default_format\":{\"format\":1600323,\"defn\":\"V540P\",\"profile\":\"MP4\",\"path\":\"\",\"url\":\"https://mms.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.default.mp4\",\"width\":960,\"height\":540,\"bitrate\":285912,\"abitrate\":32224,\"size\":2153545,\"fps\":25,\"duration\":53040,\"update_time\":1759395405,\"codec\":\"H264\"},\"extend_formats\":{\"H265\":[{\"format\":1600315,\"defn\":\"V360P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003151773702832.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003151773702832.mp4\",\"width\":640,\"height\":360,\"bitrate\":115144,\"abitrate\":32100,\"size\":1014585,\"fps\":25,\"duration\":53040,\"update_time\":1773702845,\"codec\":\"H265\"},{\"format\":1600412,\"defn\":\"V360P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004121775177781.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004121775177781.mp4\",\"width\":640,\"height\":360,\"bitrate\":88654,\"abitrate\":32100,\"size\":839561,\"fps\":25,\"duration\":53040,\"update_time\":1775177797,\"codec\":\"H265\"},{\"format\":1600397,\"defn\":\"V360P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003971786902301.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003971786902301.mp4\",\"width\":640,\"height\":360,\"bitrate\":97676,\"abitrate\":32100,\"size\":899390,\"fps\":25,\"duration\":53040,\"update_time\":1786902314,\"codec\":\"H265\"},{\"format\":1600316,\"defn\":\"V540P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003161773702845.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003161773702845.mp4\",\"width\":960,\"height\":540,\"bitrate\":187388,\"abitrate\":32100,\"size\":1493224,\"fps\":25,\"duration\":53040,\"update_time\":1773702865,\"codec\":\"H265\"},{\"format\":1600413,\"defn\":\"V540P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004131775177799.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004131775177799.mp4\",\"width\":960,\"height\":540,\"bitrate\":137338,\"abitrate\":32100,\"size\":1162345,\"fps\":25,\"duration\":53040,\"update_time\":1775177818,\"codec\":\"H265\"},{\"format\":1600398,\"defn\":\"V540P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003981786902315.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003981786902315.mp4\",\"width\":960,\"height\":540,\"bitrate\":147889,\"abitrate\":32100,\"size\":1232298,\"fps\":25,\"duration\":53040,\"update_time\":1786902334,\"codec\":\"H265\"},{\"format\":1600309,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003091759395398.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003091759395398.mp4\",\"width\":1280,\"height\":720,\"bitrate\":227142,\"abitrate\":127111,\"size\":2396740,\"fps\":25,\"duration\":53040,\"update_time\":1759395437,\"codec\":\"H265\"},{\"format\":1600741,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16007411773980514.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16007411773980514.mp4\",\"width\":1280,\"height\":720,\"bitrate\":227669,\"abitrate\":48138,\"size\":1884747,\"fps\":29.99943,\"duration\":53034,\"update_time\":1773980544,\"codec\":\"H265\"},{\"format\":1600317,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003171773702845.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003171773702845.mp4\",\"width\":1280,\"height\":720,\"bitrate\":292437,\"abitrate\":48138,\"size\":2313843,\"fps\":29.99943,\"duration\":53034,\"update_time\":1773702876,\"codec\":\"H265\"},{\"format\":1600318,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003181773702845.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003181773702845.mp4\",\"width\":1280,\"height\":720,\"bitrate\":254271,\"abitrate\":48138,\"size\":2060987,\"fps\":29.99943,\"duration\":53034,\"update_time\":1773702876,\"codec\":\"H265\"},{\"format\":1600742,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16007421773980544.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16007421773980544.mp4\",\"width\":1280,\"height\":720,\"bitrate\":213740,\"abitrate\":48138,\"size\":1792466,\"fps\":29.99943,\"duration\":53034,\"update_time\":1773980581,\"codec\":\"H265\"},{\"format\":1600414,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004141775177799.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004141775177799.mp4\",\"width\":1280,\"height\":720,\"bitrate\":238246,\"abitrate\":48138,\"size\":1955779,\"fps\":30.00019,\"duration\":53033,\"update_time\":1775177828,\"codec\":\"H265\"},{\"format\":1600415,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004151775177799.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004151775177799.mp4\",\"width\":1280,\"height\":720,\"bitrate\":230052,\"abitrate\":48138,\"size\":1901460,\"fps\":30.00019,\"duration\":53033,\"update_time\":1775177831,\"codec\":\"H265\"},{\"format\":1600399,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003991786902315.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003991786902315.mp4\",\"width\":1280,\"height\":720,\"bitrate\":259529,\"abitrate\":48138,\"size\":2096889,\"fps\":30.00019,\"duration\":53033,\"update_time\":1786902354,\"codec\":\"H265\"},{\"format\":1600400,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004001786902314.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004001786902314.mp4\",\"width\":1280,\"height\":720,\"bitrate\":256572,\"abitrate\":48138,\"size\":2077292,\"fps\":30.00019,\"duration\":53033,\"update_time\":1786902336,\"codec\":\"H265\"},{\"format\":1600743,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16007431775177799.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16007431775177799.mp4\",\"width\":1280,\"height\":720,\"bitrate\":205981,\"abitrate\":48138,\"size\":1741889,\"fps\":30.00019,\"duration\":53033,\"update_time\":1775177829,\"codec\":\"H265\"},{\"format\":1600744,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16007441775177799.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16007441775177799.mp4\",\"width\":1280,\"height\":720,\"bitrate\":194059,\"abitrate\":48138,\"size\":1662858,\"fps\":30.00019,\"duration\":53033,\"update_time\":1775177825,\"codec\":\"H265\"}]},\"ab_test\":\"\"}",
                 "item_cover": null
             },
             "images": [
@@ -2190,7 +2190,7 @@
                 {
                     "tier_index": [
                         0,
-                        2
+                        1
                     ],
                     "gallery_image": "id-11134207-81ztl-mfklf0di2aktbc"
                 },
@@ -2203,50 +2203,50 @@
                 },
                 {
                     "tier_index": [
-                        1,
-                        1
-                    ],
-                    "gallery_image": "id-11134207-81ztm-mfklf0di3p59db"
-                },
-                {
-                    "tier_index": [
-                        2,
-                        0
-                    ],
-                    "gallery_image": "id-11134207-81ztq-mfklf0di53pp54"
-                },
-                {
-                    "tier_index": [
-                        2,
-                        1
-                    ],
-                    "gallery_image": "id-11134207-81ztq-mfklf0di53pp54"
-                },
-                {
-                    "tier_index": [
-                        1,
-                        2
-                    ],
-                    "gallery_image": "id-11134207-81ztm-mfklf0di3p59db"
-                },
-                {
-                    "tier_index": [
-                        2,
-                        2
-                    ],
-                    "gallery_image": "id-11134207-81ztq-mfklf0di53pp54"
-                },
-                {
-                    "tier_index": [
                         0,
-                        0
+                        2
                     ],
                     "gallery_image": "id-11134207-81ztl-mfklf0di2aktbc"
                 },
                 {
                     "tier_index": [
-                        0,
+                        1,
+                        2
+                    ],
+                    "gallery_image": "id-11134207-81ztm-mfklf0di3p59db"
+                },
+                {
+                    "tier_index": [
+                        2,
                         1
+                    ],
+                    "gallery_image": "id-11134207-81ztq-mfklf0di53pp54"
+                },
+                {
+                    "tier_index": [
+                        2,
+                        2
+                    ],
+                    "gallery_image": "id-11134207-81ztq-mfklf0di53pp54"
+                },
+                {
+                    "tier_index": [
+                        1,
+                        1
+                    ],
+                    "gallery_image": "id-11134207-81ztm-mfklf0di3p59db"
+                },
+                {
+                    "tier_index": [
+                        2,
+                        0
+                    ],
+                    "gallery_image": "id-11134207-81ztq-mfklf0di53pp54"
+                },
+                {
+                    "tier_index": [
+                        0,
+                        0
                     ],
                     "gallery_image": "id-11134207-81ztl-mfklf0di2aktbc"
                 }
@@ -2262,15 +2262,6 @@
                         "vid": "id-11110105-6vdvd-mfcd4gn9gcgd1f",
                         "formats": [
                             {
-                                "format": 1600408,
-                                "defn": "V360P",
-                                "profile": "MP4",
-                                "path": "api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004081775177799.mp4",
-                                "url": "https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004081775177799.mp4",
-                                "width": 640,
-                                "height": 360
-                            },
-                            {
                                 "format": 1600393,
                                 "defn": "V360P",
                                 "profile": "MP4",
@@ -2280,13 +2271,13 @@
                                 "height": 360
                             },
                             {
-                                "format": 1600673,
-                                "defn": "V540P",
+                                "format": 1600408,
+                                "defn": "V360P",
                                 "profile": "MP4",
-                                "path": "api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16006731774288412.mp4",
-                                "url": "https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16006731774288412.mp4",
-                                "width": 960,
-                                "height": 540
+                                "path": "api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004081775177799.mp4",
+                                "url": "https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004081775177799.mp4",
+                                "width": 640,
+                                "height": 360
                             },
                             {
                                 "format": 1600671,
@@ -2294,6 +2285,15 @@
                                 "profile": "MP4",
                                 "path": "api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16006711773702845.mp4",
                                 "url": "https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16006711773702845.mp4",
+                                "width": 960,
+                                "height": 540
+                            },
+                            {
+                                "format": 1600673,
+                                "defn": "V540P",
+                                "profile": "MP4",
+                                "path": "api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16006731774288412.mp4",
+                                "url": "https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16006731774288412.mp4",
                                 "width": 960,
                                 "height": 540
                             },
@@ -2379,7 +2379,7 @@
                             "width": 960,
                             "height": 540
                         },
-                        "mms_data": "{\"vid\":\"id-11110105-6vdvd-mfcd4gn9gcgd1f\",\"biz\":107,\"duration\":53392,\"create_time\":1759395365,\"update_time\":1759395373,\"serviceID\":2,\"cover\":\"https://down-tx-id.img.susercontent.com/id-11110105-6vdvd-mfcd4gn9gcgd1f_cover\",\"cover_list\":[],\"formats\":[{\"format\":1600408,\"defn\":\"V360P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004081775177799.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004081775177799.mp4\",\"width\":640,\"height\":360,\"bitrate\":129072,\"abitrate\":32100,\"size\":1103896,\"fps\":25,\"duration\":53040,\"update_time\":1775177810,\"codec\":\"H264\"},{\"format\":1600393,\"defn\":\"V360P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003931786902314.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003931786902314.mp4\",\"width\":640,\"height\":360,\"bitrate\":125035,\"abitrate\":32100,\"size\":1077170,\"fps\":25,\"duration\":53040,\"update_time\":1786902321,\"codec\":\"H264\"},{\"format\":1600673,\"defn\":\"V540P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16006731774288412.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16006731774288412.mp4\",\"width\":960,\"height\":540,\"bitrate\":333045,\"abitrate\":32100,\"size\":2454564,\"fps\":25,\"duration\":53040,\"update_time\":1774288429,\"codec\":\"H264\"},{\"format\":1600671,\"defn\":\"V540P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16006711773702845.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16006711773702845.mp4\",\"width\":960,\"height\":540,\"bitrate\":185904,\"abitrate\":32100,\"size\":1479753,\"fps\":25,\"duration\":53040,\"update_time\":1773702863,\"codec\":\"H264\"},{\"format\":1600394,\"defn\":\"V540P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003941786902315.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003941786902315.mp4\",\"width\":960,\"height\":540,\"bitrate\":203679,\"abitrate\":32100,\"size\":1598566,\"fps\":25,\"duration\":53040,\"update_time\":1786902330,\"codec\":\"H264\"},{\"format\":1600409,\"defn\":\"V540P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004091775177799.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004091775177799.mp4\",\"width\":960,\"height\":540,\"bitrate\":199763,\"abitrate\":32100,\"size\":1572615,\"fps\":25,\"duration\":53040,\"update_time\":1775177823,\"codec\":\"H264\"},{\"format\":1600008,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16000081759395370.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16000081759395370.mp4\",\"width\":1280,\"height\":720,\"bitrate\":484963,\"abitrate\":127111,\"size\":4101147,\"fps\":25,\"duration\":53040,\"update_time\":1759395397,\"codec\":\"H264\"},{\"format\":1600325,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003251773702845.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003251773702845.mp4\",\"width\":1280,\"height\":720,\"bitrate\":494889,\"abitrate\":48138,\"size\":3651184,\"fps\":29.99943,\"duration\":53034,\"update_time\":1773702873,\"codec\":\"H264\"},{\"format\":1600395,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003951786902314.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003951786902314.mp4\",\"width\":1280,\"height\":720,\"bitrate\":372570,\"abitrate\":48138,\"size\":2824617,\"fps\":25,\"duration\":53040,\"update_time\":1786902336,\"codec\":\"H264\"},{\"format\":1600396,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003961786902315.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003961786902315.mp4\",\"width\":1280,\"height\":720,\"bitrate\":560771,\"abitrate\":48138,\"size\":4089927,\"fps\":30.00019,\"duration\":53033,\"update_time\":1786902342,\"codec\":\"H264\"},{\"format\":1600410,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004101775177799.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004101775177799.mp4\",\"width\":1280,\"height\":720,\"bitrate\":400187,\"abitrate\":48138,\"size\":3007725,\"fps\":25,\"duration\":53040,\"update_time\":1775177839,\"codec\":\"H264\"},{\"format\":1600411,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004111775177799.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004111775177799.mp4\",\"width\":1280,\"height\":720,\"bitrate\":553562,\"abitrate\":48138,\"size\":4042148,\"fps\":30.00019,\"duration\":53033,\"update_time\":1775177830,\"codec\":\"H264\"}],\"default_format\":{\"format\":1600323,\"defn\":\"V540P\",\"profile\":\"MP4\",\"path\":\"\",\"url\":\"https://mms.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.default.mp4\",\"width\":960,\"height\":540,\"bitrate\":285912,\"abitrate\":32224,\"size\":2153545,\"fps\":25,\"duration\":53040,\"update_time\":1759395405,\"codec\":\"H264\"},\"extend_formats\":{\"H265\":[{\"format\":1600315,\"defn\":\"V360P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003151773702832.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003151773702832.mp4\",\"width\":640,\"height\":360,\"bitrate\":115144,\"abitrate\":32100,\"size\":1014585,\"fps\":25,\"duration\":53040,\"update_time\":1773702845,\"codec\":\"H265\"},{\"format\":1600397,\"defn\":\"V360P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003971786902301.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003971786902301.mp4\",\"width\":640,\"height\":360,\"bitrate\":97676,\"abitrate\":32100,\"size\":899390,\"fps\":25,\"duration\":53040,\"update_time\":1786902314,\"codec\":\"H265\"},{\"format\":1600412,\"defn\":\"V360P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004121775177781.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004121775177781.mp4\",\"width\":640,\"height\":360,\"bitrate\":88654,\"abitrate\":32100,\"size\":839561,\"fps\":25,\"duration\":53040,\"update_time\":1775177797,\"codec\":\"H265\"},{\"format\":1600316,\"defn\":\"V540P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003161773702845.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003161773702845.mp4\",\"width\":960,\"height\":540,\"bitrate\":187388,\"abitrate\":32100,\"size\":1493224,\"fps\":25,\"duration\":53040,\"update_time\":1773702865,\"codec\":\"H265\"},{\"format\":1600398,\"defn\":\"V540P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003981786902315.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003981786902315.mp4\",\"width\":960,\"height\":540,\"bitrate\":147889,\"abitrate\":32100,\"size\":1232298,\"fps\":25,\"duration\":53040,\"update_time\":1786902334,\"codec\":\"H265\"},{\"format\":1600413,\"defn\":\"V540P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004131775177799.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004131775177799.mp4\",\"width\":960,\"height\":540,\"bitrate\":137338,\"abitrate\":32100,\"size\":1162345,\"fps\":25,\"duration\":53040,\"update_time\":1775177818,\"codec\":\"H265\"},{\"format\":1600309,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003091759395398.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003091759395398.mp4\",\"width\":1280,\"height\":720,\"bitrate\":227142,\"abitrate\":127111,\"size\":2396740,\"fps\":25,\"duration\":53040,\"update_time\":1759395437,\"codec\":\"H265\"},{\"format\":1600741,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16007411773980514.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16007411773980514.mp4\",\"width\":1280,\"height\":720,\"bitrate\":227669,\"abitrate\":48138,\"size\":1884747,\"fps\":29.99943,\"duration\":53034,\"update_time\":1773980544,\"codec\":\"H265\"},{\"format\":1600317,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003171773702845.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003171773702845.mp4\",\"width\":1280,\"height\":720,\"bitrate\":292437,\"abitrate\":48138,\"size\":2313843,\"fps\":29.99943,\"duration\":53034,\"update_time\":1773702876,\"codec\":\"H265\"},{\"format\":1600318,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003181773702845.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003181773702845.mp4\",\"width\":1280,\"height\":720,\"bitrate\":254271,\"abitrate\":48138,\"size\":2060987,\"fps\":29.99943,\"duration\":53034,\"update_time\":1773702876,\"codec\":\"H265\"},{\"format\":1600742,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16007421773980544.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16007421773980544.mp4\",\"width\":1280,\"height\":720,\"bitrate\":213740,\"abitrate\":48138,\"size\":1792466,\"fps\":29.99943,\"duration\":53034,\"update_time\":1773980581,\"codec\":\"H265\"},{\"format\":1600414,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004141775177799.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004141775177799.mp4\",\"width\":1280,\"height\":720,\"bitrate\":238246,\"abitrate\":48138,\"size\":1955779,\"fps\":30.00019,\"duration\":53033,\"update_time\":1775177828,\"codec\":\"H265\"},{\"format\":1600743,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16007431775177799.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16007431775177799.mp4\",\"width\":1280,\"height\":720,\"bitrate\":205981,\"abitrate\":48138,\"size\":1741889,\"fps\":30.00019,\"duration\":53033,\"update_time\":1775177829,\"codec\":\"H265\"},{\"format\":1600399,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003991786902315.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003991786902315.mp4\",\"width\":1280,\"height\":720,\"bitrate\":259529,\"abitrate\":48138,\"size\":2096889,\"fps\":30.00019,\"duration\":53033,\"update_time\":1786902354,\"codec\":\"H265\"},{\"format\":1600415,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004151775177799.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004151775177799.mp4\",\"width\":1280,\"height\":720,\"bitrate\":230052,\"abitrate\":48138,\"size\":1901460,\"fps\":30.00019,\"duration\":53033,\"update_time\":1775177831,\"codec\":\"H265\"},{\"format\":1600400,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004001786902314.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004001786902314.mp4\",\"width\":1280,\"height\":720,\"bitrate\":256572,\"abitrate\":48138,\"size\":2077292,\"fps\":30.00019,\"duration\":53033,\"update_time\":1786902336,\"codec\":\"H265\"},{\"format\":1600744,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16007441775177799.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16007441775177799.mp4\",\"width\":1280,\"height\":720,\"bitrate\":194059,\"abitrate\":48138,\"size\":1662858,\"fps\":30.00019,\"duration\":53033,\"update_time\":1775177825,\"codec\":\"H265\"}]},\"ab_test\":\"\"}",
+                        "mms_data": "{\"vid\":\"id-11110105-6vdvd-mfcd4gn9gcgd1f\",\"biz\":107,\"duration\":53392,\"create_time\":1759395365,\"update_time\":1759395373,\"serviceID\":2,\"cover\":\"https://down-tx-id.img.susercontent.com/id-11110105-6vdvd-mfcd4gn9gcgd1f_cover\",\"cover_list\":[],\"formats\":[{\"format\":1600393,\"defn\":\"V360P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003931786902314.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003931786902314.mp4\",\"width\":640,\"height\":360,\"bitrate\":125035,\"abitrate\":32100,\"size\":1077170,\"fps\":25,\"duration\":53040,\"update_time\":1786902321,\"codec\":\"H264\"},{\"format\":1600408,\"defn\":\"V360P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004081775177799.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004081775177799.mp4\",\"width\":640,\"height\":360,\"bitrate\":129072,\"abitrate\":32100,\"size\":1103896,\"fps\":25,\"duration\":53040,\"update_time\":1775177810,\"codec\":\"H264\"},{\"format\":1600671,\"defn\":\"V540P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16006711773702845.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16006711773702845.mp4\",\"width\":960,\"height\":540,\"bitrate\":185904,\"abitrate\":32100,\"size\":1479753,\"fps\":25,\"duration\":53040,\"update_time\":1773702863,\"codec\":\"H264\"},{\"format\":1600673,\"defn\":\"V540P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16006731774288412.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16006731774288412.mp4\",\"width\":960,\"height\":540,\"bitrate\":333045,\"abitrate\":32100,\"size\":2454564,\"fps\":25,\"duration\":53040,\"update_time\":1774288429,\"codec\":\"H264\"},{\"format\":1600394,\"defn\":\"V540P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003941786902315.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003941786902315.mp4\",\"width\":960,\"height\":540,\"bitrate\":203679,\"abitrate\":32100,\"size\":1598566,\"fps\":25,\"duration\":53040,\"update_time\":1786902330,\"codec\":\"H264\"},{\"format\":1600409,\"defn\":\"V540P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004091775177799.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004091775177799.mp4\",\"width\":960,\"height\":540,\"bitrate\":199763,\"abitrate\":32100,\"size\":1572615,\"fps\":25,\"duration\":53040,\"update_time\":1775177823,\"codec\":\"H264\"},{\"format\":1600008,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16000081759395370.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16000081759395370.mp4\",\"width\":1280,\"height\":720,\"bitrate\":484963,\"abitrate\":127111,\"size\":4101147,\"fps\":25,\"duration\":53040,\"update_time\":1759395397,\"codec\":\"H264\"},{\"format\":1600325,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003251773702845.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003251773702845.mp4\",\"width\":1280,\"height\":720,\"bitrate\":494889,\"abitrate\":48138,\"size\":3651184,\"fps\":29.99943,\"duration\":53034,\"update_time\":1773702873,\"codec\":\"H264\"},{\"format\":1600395,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003951786902314.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003951786902314.mp4\",\"width\":1280,\"height\":720,\"bitrate\":372570,\"abitrate\":48138,\"size\":2824617,\"fps\":25,\"duration\":53040,\"update_time\":1786902336,\"codec\":\"H264\"},{\"format\":1600396,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003961786902315.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003961786902315.mp4\",\"width\":1280,\"height\":720,\"bitrate\":560771,\"abitrate\":48138,\"size\":4089927,\"fps\":30.00019,\"duration\":53033,\"update_time\":1786902342,\"codec\":\"H264\"},{\"format\":1600410,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004101775177799.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004101775177799.mp4\",\"width\":1280,\"height\":720,\"bitrate\":400187,\"abitrate\":48138,\"size\":3007725,\"fps\":25,\"duration\":53040,\"update_time\":1775177839,\"codec\":\"H264\"},{\"format\":1600411,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004111775177799.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004111775177799.mp4\",\"width\":1280,\"height\":720,\"bitrate\":553562,\"abitrate\":48138,\"size\":4042148,\"fps\":30.00019,\"duration\":53033,\"update_time\":1775177830,\"codec\":\"H264\"}],\"default_format\":{\"format\":1600323,\"defn\":\"V540P\",\"profile\":\"MP4\",\"path\":\"\",\"url\":\"https://mms.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.default.mp4\",\"width\":960,\"height\":540,\"bitrate\":285912,\"abitrate\":32224,\"size\":2153545,\"fps\":25,\"duration\":53040,\"update_time\":1759395405,\"codec\":\"H264\"},\"extend_formats\":{\"H265\":[{\"format\":1600315,\"defn\":\"V360P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003151773702832.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003151773702832.mp4\",\"width\":640,\"height\":360,\"bitrate\":115144,\"abitrate\":32100,\"size\":1014585,\"fps\":25,\"duration\":53040,\"update_time\":1773702845,\"codec\":\"H265\"},{\"format\":1600412,\"defn\":\"V360P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004121775177781.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004121775177781.mp4\",\"width\":640,\"height\":360,\"bitrate\":88654,\"abitrate\":32100,\"size\":839561,\"fps\":25,\"duration\":53040,\"update_time\":1775177797,\"codec\":\"H265\"},{\"format\":1600397,\"defn\":\"V360P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003971786902301.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003971786902301.mp4\",\"width\":640,\"height\":360,\"bitrate\":97676,\"abitrate\":32100,\"size\":899390,\"fps\":25,\"duration\":53040,\"update_time\":1786902314,\"codec\":\"H265\"},{\"format\":1600316,\"defn\":\"V540P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003161773702845.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003161773702845.mp4\",\"width\":960,\"height\":540,\"bitrate\":187388,\"abitrate\":32100,\"size\":1493224,\"fps\":25,\"duration\":53040,\"update_time\":1773702865,\"codec\":\"H265\"},{\"format\":1600413,\"defn\":\"V540P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004131775177799.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004131775177799.mp4\",\"width\":960,\"height\":540,\"bitrate\":137338,\"abitrate\":32100,\"size\":1162345,\"fps\":25,\"duration\":53040,\"update_time\":1775177818,\"codec\":\"H265\"},{\"format\":1600398,\"defn\":\"V540P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003981786902315.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003981786902315.mp4\",\"width\":960,\"height\":540,\"bitrate\":147889,\"abitrate\":32100,\"size\":1232298,\"fps\":25,\"duration\":53040,\"update_time\":1786902334,\"codec\":\"H265\"},{\"format\":1600309,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003091759395398.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003091759395398.mp4\",\"width\":1280,\"height\":720,\"bitrate\":227142,\"abitrate\":127111,\"size\":2396740,\"fps\":25,\"duration\":53040,\"update_time\":1759395437,\"codec\":\"H265\"},{\"format\":1600741,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16007411773980514.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16007411773980514.mp4\",\"width\":1280,\"height\":720,\"bitrate\":227669,\"abitrate\":48138,\"size\":1884747,\"fps\":29.99943,\"duration\":53034,\"update_time\":1773980544,\"codec\":\"H265\"},{\"format\":1600317,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003171773702845.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003171773702845.mp4\",\"width\":1280,\"height\":720,\"bitrate\":292437,\"abitrate\":48138,\"size\":2313843,\"fps\":29.99943,\"duration\":53034,\"update_time\":1773702876,\"codec\":\"H265\"},{\"format\":1600318,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003181773702845.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003181773702845.mp4\",\"width\":1280,\"height\":720,\"bitrate\":254271,\"abitrate\":48138,\"size\":2060987,\"fps\":29.99943,\"duration\":53034,\"update_time\":1773702876,\"codec\":\"H265\"},{\"format\":1600742,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16007421773980544.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16007421773980544.mp4\",\"width\":1280,\"height\":720,\"bitrate\":213740,\"abitrate\":48138,\"size\":1792466,\"fps\":29.99943,\"duration\":53034,\"update_time\":1773980581,\"codec\":\"H265\"},{\"format\":1600414,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004141775177799.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004141775177799.mp4\",\"width\":1280,\"height\":720,\"bitrate\":238246,\"abitrate\":48138,\"size\":1955779,\"fps\":30.00019,\"duration\":53033,\"update_time\":1775177828,\"codec\":\"H265\"},{\"format\":1600415,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004151775177799.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004151775177799.mp4\",\"width\":1280,\"height\":720,\"bitrate\":230052,\"abitrate\":48138,\"size\":1901460,\"fps\":30.00019,\"duration\":53033,\"update_time\":1775177831,\"codec\":\"H265\"},{\"format\":1600399,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003991786902315.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16003991786902315.mp4\",\"width\":1280,\"height\":720,\"bitrate\":259529,\"abitrate\":48138,\"size\":2096889,\"fps\":30.00019,\"duration\":53033,\"update_time\":1786902354,\"codec\":\"H265\"},{\"format\":1600400,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004001786902314.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16004001786902314.mp4\",\"width\":1280,\"height\":720,\"bitrate\":256572,\"abitrate\":48138,\"size\":2077292,\"fps\":30.00019,\"duration\":53033,\"update_time\":1786902336,\"codec\":\"H265\"},{\"format\":1600743,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16007431775177799.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16007431775177799.mp4\",\"width\":1280,\"height\":720,\"bitrate\":205981,\"abitrate\":48138,\"size\":1741889,\"fps\":30.00019,\"duration\":53033,\"update_time\":1775177829,\"codec\":\"H265\"},{\"format\":1600744,\"defn\":\"V720P\",\"profile\":\"MP4\",\"path\":\"api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16007441775177799.mp4\",\"url\":\"https://down-tx-id.vod.susercontent.com/api/v4/11110105/mms/id-11110105-6vdvd-mfcd4gn9gcgd1f.16007441775177799.mp4\",\"width\":1280,\"height\":720,\"bitrate\":194059,\"abitrate\":48138,\"size\":1662858,\"fps\":30.00019,\"duration\":53033,\"update_time\":1775177825,\"codec\":\"H265\"}]},\"ab_test\":\"\"}",
                         "item_cover": null
                     }
                 },
@@ -2520,7 +2520,7 @@
             "final_price_info": null,
             "price_subtext": null,
             "price_model": {
-                "price_single_model_id": 281832521391,
+                "price_single_model_id": 281832521385,
                 "price_min_model_id": null,
                 "price_max_model_id": null
             },
@@ -2568,7 +2568,7 @@
             "historical_sold": null,
             "global_sold": null,
             "liked": false,
-            "liked_count": 30778,
+            "liked_count": 30779,
             "cmt_count": 2270,
             "should_move_ratings_above": null,
             "review_rcmd_exp_group": null,
@@ -2634,8 +2634,8 @@
                     "channel_delivery_info": {
                         "has_edt": true,
                         "display_mode": "edt_by_date",
-                        "estimated_delivery_date_from": 1789320119,
-                        "estimated_delivery_date_to": 1789492919,
+                        "estimated_delivery_date_from": 1789320849,
+                        "estimated_delivery_date_to": 1789493649,
                         "estimated_delivery_time_min": 3,
                         "estimated_delivery_time_max": 5,
                         "delay_message": null,
@@ -2707,8 +2707,8 @@
                     "channel_delivery_info": {
                         "has_edt": true,
                         "display_mode": "edt_by_date",
-                        "estimated_delivery_date_from": 1789363911,
-                        "estimated_delivery_date_to": 1789536711,
+                        "estimated_delivery_date_from": 1789364641,
+                        "estimated_delivery_date_to": 1789537441,
                         "estimated_delivery_time_min": 3,
                         "estimated_delivery_time_max": 5,
                         "delay_message": null,
@@ -2790,8 +2790,8 @@
                 "channel_delivery_info": {
                     "has_edt": true,
                     "display_mode": "edt_by_date",
-                    "estimated_delivery_date_from": 1789320119,
-                    "estimated_delivery_date_to": 1789492919,
+                    "estimated_delivery_date_from": 1789320849,
+                    "estimated_delivery_date_to": 1789493649,
                     "estimated_delivery_time_min": 3,
                     "estimated_delivery_time_max": 5,
                     "delay_message": "",
@@ -2989,7 +2989,7 @@
             "attrs": [
                 {
                     "name": "Stok",
-                    "value": "10",
+                    "value": "8",
                     "id": null,
                     "is_timestamp": null,
                     "brand_option": null,
@@ -3239,7 +3239,7 @@
         "shop_detailed": {
             "shopid": 241308147,
             "userid": 241313695,
-            "last_active_time": 1789104596,
+            "last_active_time": 1789105302,
             "vacation": false,
             "place": "KOTA JAKARTA BARAT - CENGKARENG, DKI JAKARTA, ID",
             "account": {
@@ -3258,10 +3258,10 @@
             "name": "iBox Official Shop",
             "ctime": 1585888366,
             "response_time": 4724,
-            "follower_count": 2959591,
+            "follower_count": 2959590,
             "show_official_shop_label": true,
             "rating_bad": 1419,
-            "rating_good": 439880,
+            "rating_good": 439883,
             "rating_normal": 2554,
             "session_infos": null,
             "status": 1,
