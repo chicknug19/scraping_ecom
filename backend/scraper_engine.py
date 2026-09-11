@@ -34,7 +34,7 @@ def scrape_shop_profile(username):
     shop_data = None
     
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True) 
+        browser = p.chromium.launch(headless=False) 
         context = browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
             viewport={"width": 1920, "height": 1080}
@@ -110,7 +110,7 @@ def get_competitor_urls(keyword, limit=10, location=""):
     product_links = []
     
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True) 
+        browser = p.chromium.launch(headless=False) 
         context = browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
             viewport={"width": 1920, "height": 1080}
@@ -140,6 +140,11 @@ def get_competitor_urls(keyword, limit=10, location=""):
 
         try:
             page.goto(search_url, timeout=45000, wait_until="commit")
+            # TAMBAHAN DETEKSI VISUAL UNTUK DEBUGGING
+            time.sleep(3)
+            print(f"👀 Memantau layar... URL saat ini: {page.url}")
+            if "login" in page.url or "verify" in page.url:
+                print("🚨 GAGAL SCRAPING: Kuki cookies.json kedaluwarsa atau IP diblokir. Harap perbarui kuki manual!")
         except Exception as e:
             print(f"Info navigasi search: {e}")
 
@@ -147,7 +152,29 @@ def get_competitor_urls(keyword, limit=10, location=""):
         try:
             page.locator("a[href*='-i.']").first.wait_for(timeout=15000)
         except:
-            time.sleep(5)
+            # --- MULAI MODE INTERVENSI MANUAL ---
+            print("\n⚠️ PRODUK TIDAK MUNCUL! Kemungkinan terhadang Captcha Shopee.")
+            print("🛑 BROWSER DITAHAN: Silakan buka jendela browser Playwright sekarang!")
+            print("👉 1. Klik 'Bahasa Indonesia' pada pop-up yang menutupi layar.")
+            print("👉 2. Kerjakan Slider Puzzle secara manual.")
+            print("👉 3. Tunggu sampai kamu dialihkan ke halaman pencarian produk.")
+            
+            # Skrip akan membeku (pause) di sini sampai kamu menekan tombol Enter di terminal
+            input("\n🟢 TEKAN ENTER DI TERMINAL INI JIKA KAMU SUDAH BERHASIL MELEWATI CAPTCHA... ")
+            
+            print("\n💾 Menyimpan kuki sesi yang baru tervalidasi...")
+            # Ambil kuki dari browser Playwright yang baru saja kamu loloskan
+            new_cookies = context.cookies()
+            with open("cookies.json", "w", encoding="utf-8") as f:
+                json.dump(new_cookies, f, indent=4)
+            print("✅ Kuki sukses diperbarui ke cookies.json! Melanjutkan scraping...")
+            # --- SELESAI MODE MANUAL ---
+
+            # Coba tunggu elemen produk lagi setelah Captcha selesai
+            try:
+                page.locator("a[href*='-i.']").first.wait_for(timeout=10000)
+            except:
+                print("❌ Produk tetap tidak ditemukan setelah Captcha.")
 
         scroll_attempts = (limit // 10) + 3 
         print(f"Menggulir halaman {scroll_attempts} kali untuk memuat {limit} produk...")
@@ -226,7 +253,7 @@ def get_store_product_urls(username, keyword="", limit=10, is_all=False):
     product_links = []
     
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True) 
+        browser = p.chromium.launch(headless=False) 
         context = browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
             viewport={"width": 1920, "height": 1080}
@@ -320,7 +347,7 @@ def scrape_shopee_playwright(product_url):
     result_data = None 
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
+        browser = p.chromium.launch(headless=False)
         context = browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
             viewport={"width": 1920, "height": 1080}
