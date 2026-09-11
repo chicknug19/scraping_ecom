@@ -9,6 +9,8 @@ export default function App() {
   const [location, setLocation] = useState(''); 
   const [loading, setLoading] = useState(false);
   const [scrapedData, setScrapedData] = useState([]);
+  const [platform, setPlatform] = useState('shopee');
+  const [storePlatform, setStorePlatform] = useState('shopee');
   // State untuk Scraper Toko
   const [storeUsernames, setStoreUsernames] = useState("");
   const [storeLimit, setStoreLimit] = useState(10);
@@ -31,15 +33,16 @@ export default function App() {
 
 
     try {
-        const response = await fetch('https://scraper-radi-caheg6c6g6gcghbf.indonesiacentral-01.azurewebsites.net/api/scrape', {
-        // const response = await fetch('http://localhost:8000/api/scrape', {
+        // const response = await fetch('https://scraper-radi-caheg6c6g6gcghbf.indonesiacentral-01.azurewebsites.net/api/scrape', {
+        const response = await fetch('http://localhost:8000/api/scrape', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                keyword, 
-                limit: parseInt(limit),
-                location 
-            })
+            body: JSON.stringify({
+            platform,
+            keyword,
+            limit: parseInt(limit),
+            location
+          })
         });
         
         const data = await response.json();
@@ -113,11 +116,11 @@ export default function App() {
     setScrapedData([]); // Bersihkan layar sebelum memuat yang baru
     
     try {
-      const response = await fetch('https://scraper-radi-caheg6c6g6gcghbf.indonesiacentral-01.azurewebsites.net/api/scrape-stores', {
-      // const response = await fetch('http://localhost:8000/api/scrape-stores', {
+      // const response = await fetch('https://scraper-radi-caheg6c6g6gcghbf.indonesiacentral-01.azurewebsites.net/api/scrape-stores', {
+      const response = await fetch('http://localhost:8000/api/scrape-stores', {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tasks: validTasks }),
+        body: JSON.stringify({ platform: storePlatform, tasks: validTasks }),
       });
 
       const data = await response.json();
@@ -147,6 +150,13 @@ export default function App() {
         {/* ================= PANEL KONTROL SCRAPING ================= */}
         <div className="bg-white p-6 rounded-lg shadow-md border-t-4 border-orange-500">
           <h1 className="text-3xl font-bold mb-6 text-orange-500">Shopee Scraper by product</h1>
+          <select
+            value={platform}
+            onChange={(e) => setPlatform(e.target.value)}
+          >
+            <option value="shopee">Shopee</option>
+            <option value="tokopedia">Tokopedia</option>
+          </select>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <div>
@@ -201,6 +211,14 @@ export default function App() {
         <h2 className="text-xl font-bold text-green-600 mb-4">
           🏪 Scrape by store and Product of the store
         </h2>
+        <select
+          value={storePlatform}
+          onChange={(e) => setStorePlatform(e.target.value)}
+          className="border border-gray-300 rounded p-2 mb-4"
+        >
+          <option value="shopee">Shopee</option>
+          <option value="tokopedia">Tokopedia</option>
+        </select>
 
         {storeTasks.map((task, index) => (
           <div key={index} className="flex flex-wrap items-end gap-3 mb-4 p-4 border border-gray-200 rounded relative bg-gray-50">

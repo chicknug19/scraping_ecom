@@ -5,3 +5,7 @@ pyodbc
 python-dotenv
 google-genai
 playwright-stealth
+selenium
+tqdm
+pydantic
+pandas

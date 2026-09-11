@@ -7,7 +7,10 @@ import time
 from dotenv import load_dotenv
 from typing import Optional
 from google import genai
+import pandas as pd
 from google.genai import types
+from typing import Literal
+from scraper_tokopedia import run_scrape
 from scraper_engine import get_competitor_urls, scrape_shopee_playwright, get_store_product_urls
 
 load_dotenv()
@@ -102,6 +105,7 @@ def chat_with_ai(req: ChatRequest):
         return {"error": str(e)}
 
 class ScrapeRequest(BaseModel):
+    platform: Literal["shopee", "tokopedia"] = "shopee"
     keyword: str
     limit: int = 10
     location: Optional[str] = ""
@@ -144,7 +148,10 @@ def save_to_database(data):
                 OUTPUT INSERTED.StoreID 
                 VALUES (?, ?, ?, ?, ?, ?, DATEADD(hour, 7, GETUTCDATE()))
             """, username_data, data['shop_name'], nib_data, followers_data, products_data, shop_rating_data)
-            store_id = cursor.fetchone()[0]
+            inserted_store = cursor.fetchone()
+            if inserted_store is None:
+                raise RuntimeError(f"Gagal mendapatkan StoreID untuk toko: {data['shop_name']}")
+            store_id = inserted_store[0]
 
         # ---------------------------------------------------------
         # TAHAP 2: UPSERT DATA PRODUK (ITEMS)
@@ -169,7 +176,10 @@ def save_to_database(data):
                 OUTPUT INSERTED.ItemCode
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, DATEADD(hour, 7, GETUTCDATE()))
             """, data['item_name'], store_id, data['shop_name'], data['location'], data['rating_star'], data['total_ratings'], data['sold'], data['image_url'], data['source_url'])
-            generated_item_code = cursor.fetchone()[0]
+            inserted_item = cursor.fetchone()
+            if inserted_item is None:
+                raise RuntimeError("INSERT Items tidak mengembalikan ItemCode")
+            generated_item_code = inserted_item[0]
 
         # ---------------------------------------------------------
         # TAHAP 3: INSERT VARIAN & HARGA TERBARU
@@ -192,10 +202,26 @@ def save_to_database(data):
 
 @app.post("/api/scrape")
 def run_scraper(req: ScrapeRequest):
-    print(f"Menerima request dari frontend: {req.keyword} (Limit: {req.limit}, Lokasi: {req.location})")
-    
-    # Kirim parameter location ke fungsi get_competitor_urls
-    daftar_url = get_competitor_urls(keyword=req.keyword, limit=req.limit, location=req.location)
+    if req.platform == "tokopedia":
+        result = run_scrape(
+            search_type=1,
+            keywords=req.keyword,
+            target_count=req.limit
+        )
+
+        return {
+            "message": "Selesai",
+            "platform": "tokopedia",
+            "results": [],
+            "summary": result
+        }
+
+    daftar_url = get_competitor_urls(
+        keyword=req.keyword,
+        limit=req.limit,
+        location=req.location or ""
+    )
+
     semua_data = []
 
     for target_url in daftar_url:
@@ -205,7 +231,11 @@ def run_scraper(req: ScrapeRequest):
             save_to_database(data_produk)
         time.sleep(2)
 
-    return {"message": "Selesai", "results": semua_data}
+    return {
+        "message": "Selesai",
+        "platform": "shopee",
+        "results": semua_data
+    }
 
 
 
@@ -219,30 +249,61 @@ class StoreTask(BaseModel):
 
 # Model pembungkus array tugas
 class StoreScrapeRequest(BaseModel):
+    platform: Literal["shopee", "tokopedia"] = "shopee"
     tasks: list[StoreTask]
 
 @app.post("/api/scrape-stores")
 def run_store_scraper(req: StoreScrapeRequest):
-    print(f"\n🚀 Memulai Multi-Task Store Scraper. Total Tugas: {len(req.tasks)}")
+    print(
+        f"\nMemulai scraper {req.platform}. "
+        f"Total tugas: {len(req.tasks)}"
+    )
+
+    if req.platform == "tokopedia":
+        summaries = []
+
+        for task in req.tasks:
+            if not task.username.strip():
+                continue
+
+            result = run_scrape(
+                search_type=2,
+                keywords=task.username.strip(),
+                target_count=task.limit
+            )
+            summaries.append(result)
+
+        return {
+            "message": f"Berhasil memproses {len(summaries)} toko Tokopedia.",
+            "platform": "tokopedia",
+            "results": [],
+            "summary": summaries
+        }
+
     semua_data = []
 
     for task in req.tasks:
-        # Panggil API cerdas dengan semua parameter yang diminta UI
         daftar_url = get_store_product_urls(
-            username=task.username, 
-            keyword=task.keyword, 
-            limit=task.limit, 
+            username=task.username,
+            keyword=task.keyword,
+            limit=task.limit,
             is_all=task.isAll
         )
-        
+
         for target_url in daftar_url:
             data_produk = scrape_shopee_playwright(target_url)
+
             if data_produk:
                 semua_data.append(data_produk)
                 save_to_database(data_produk)
+
             time.sleep(2)
 
-    return {"message": f"Berhasil memproses {len(req.tasks)} tugas.", "results": semua_data}
+    return {
+        "message": f"Berhasil memproses {len(req.tasks)} toko Shopee.",
+        "platform": "shopee",
+        "results": semua_data
+    }
 
 if __name__ == "__main__":
     import uvicorn
