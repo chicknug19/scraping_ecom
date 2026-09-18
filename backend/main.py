@@ -9,14 +9,12 @@ from typing import Optional
 from google import genai
 from google.genai import types
 
-# Pastikan mengimpor parse_scraping_intent dari ai_agent
 from ai_agent import filter_urls_with_gemini, parse_scraping_intent 
 from scraper_engine import get_competitor_urls, scrape_shopee_playwright, get_store_product_urls
 
 load_dotenv()
 app = FastAPI()
 
-# Mengizinkan Frontend (React) berkomunikasi dengan Backend (Python)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -84,7 +82,6 @@ class StoreTask(BaseModel):
 class StoreScrapeRequest(BaseModel):
     tasks: list[StoreTask]
 
-# Model baru untuk Smart Scrape (AI Mode)
 class SmartScrapeRequest(BaseModel):
     prompt: str
 
@@ -132,7 +129,6 @@ def save_to_database(data):
         shop_rating_data = data.get('shop_rating', 0.0)
         username_data = data.get('username') or data['shop_name'].replace(" ", "").lower()[:50]
 
-        # TAHAP 1: UPSERT STORES
         cursor.execute("SELECT StoreID FROM Stores WHERE ShopName = ? AND Platform = ?", data['shop_name'], platform_data)
         store_row = cursor.fetchone()
 
@@ -152,7 +148,6 @@ def save_to_database(data):
             """, username_data, data['shop_name'], nib_data, followers_data, products_data, shop_rating_data, platform_data)
             store_id = cursor.fetchone()[0]
 
-        # TAHAP 2: UPSERT ITEMS
         cursor.execute("SELECT ItemCode FROM Items WHERE ItemName = ? AND StoreID = ?", data['item_name'], store_id)
         item_row = cursor.fetchone()
 
@@ -173,7 +168,6 @@ def save_to_database(data):
             """, data['item_name'], store_id, data['shop_name'], location_data, data['rating_star'], data['total_ratings'], data['sold'], data['image_url'], data['source_url'], stock_data, platform_data)
             generated_item_code = cursor.fetchone()[0]
 
-        # TAHAP 3: INSERT VARIANTS
         if generated_item_code and data.get('variants'):
             query_variant = """
                 INSERT INTO ItemVariants (ItemCode, VariantName, Price, Stock)
@@ -184,7 +178,7 @@ def save_to_database(data):
 
         conn.commit()
         conn.close()
-        print(f"✅ [DB] Sukses upsert item ID {generated_item_code} (Total Stok: {stock_data}) untuk Toko {store_id} WIB")
+        print(f"✅ [DB] Sukses upsert item ID {generated_item_code} untuk Toko {store_id}")
     except Exception as e:
         print(f"❌ Error DB: {e}")
 
@@ -197,6 +191,12 @@ def run_scraper(req: ScrapeRequest):
 
     for target_url in daftar_url:
         data_produk = scrape_shopee_playwright(target_url)
+        
+        # --- REM DARURAT ---
+        if data_produk and data_produk.get("status") == "BLOCKED":
+            print("🛑 ALERT: Terhenti paksa karena CAPTCHA/Hard Block.")
+            break
+            
         if data_produk:
             semua_data.append(data_produk)
             save_to_database(data_produk)
@@ -209,8 +209,11 @@ def run_scraper(req: ScrapeRequest):
 def run_store_scraper(req: StoreScrapeRequest):
     print(f"\n🚀 Memulai Multi-Task Store Scraper. Total Tugas: {len(req.tasks)}")
     semua_data = []
+    is_blocked_global = False
 
     for task in req.tasks:
+        if is_blocked_global: break # Keluar dari tugas toko lain jika kena blok
+        
         clean_username = task.username.replace(" ", "").lower() 
         print(f"Mengeksekusi toko: '{clean_username}'")
         
@@ -223,28 +226,30 @@ def run_store_scraper(req: StoreScrapeRequest):
         
         for target_url in daftar_url:
             data_produk = scrape_shopee_playwright(target_url)
+            
+            # --- REM DARURAT ---
+            if data_produk and data_produk.get("status") == "BLOCKED":
+                print("🛑 ALERT: Terhenti paksa karena CAPTCHA/Hard Block.")
+                is_blocked_global = True
+                break
+                
             if data_produk:
                 semua_data.append(data_produk)
                 save_to_database(data_produk)
             time.sleep(2)
 
-    return {"message": f"Berhasil memproses {len(req.tasks)} tugas.", "results": semua_data}
+    return {"message": f"Selesai memproses.", "results": semua_data}
 
 # --- ENDPOINT 4: SCRAPE TOKO (AI SMART MODE) ---
 @app.post("/api/scrape-smart")
 def run_smart_store_scraper(req: SmartScrapeRequest):
     print(f"\n🧠 Memulai Smart Scraper dengan prompt: '{req.prompt}'")
     
-    # 1. Panggil Parser Intent dari ai_agent.py
     intent_data = parse_scraping_intent(req.prompt)
-    
-    # 2. Jika validasi gagal, kembalikan pesan ke frontend
     if not intent_data.get("is_valid"):
         return {"message": intent_data.get("message", "Perintah tidak lengkap.")}
         
     semua_data = []
-    
-    # 3. Ekstrak data dari hasil pemikiran AI
     username = intent_data.get("username", "").replace(" ", "").lower()
     keyword = intent_data.get("keyword", "")
     limit = intent_data.get("limit") or 10
@@ -253,23 +258,28 @@ def run_smart_store_scraper(req: SmartScrapeRequest):
     
     print(f"🤖 AI Menerjemahkan Tugas -> Toko: {username}, Keyword: {keyword}, Limit: {limit}, Aturan Khusus: {custom_rules}")
     
-    # 4. Panggil scraper engine dengan menyertakan custom_rules
     daftar_url = get_store_product_urls(
         username=username, 
         keyword=keyword, 
         limit=limit, 
         is_all=is_all,
-        custom_rules=custom_rules # <--- Mengirim aturan khusus ke Scraper
+        custom_rules=custom_rules 
     )
     
     for target_url in daftar_url:
         data_produk = scrape_shopee_playwright(target_url)
+        
+        # --- REM DARURAT ---
+        if data_produk and data_produk.get("status") == "BLOCKED":
+            print("🛑 ALERT: Terhenti paksa karena CAPTCHA/Hard Block.")
+            break
+            
         if data_produk:
             semua_data.append(data_produk)
             save_to_database(data_produk)
         time.sleep(2)
 
-    return {"message": "Sukses ditarik menggunakan AI", "results": semua_data}
+    return {"message": "Selesai", "results": semua_data}
 
 if __name__ == "__main__":
     import uvicorn
