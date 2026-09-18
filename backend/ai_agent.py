@@ -69,8 +69,9 @@ def filter_urls_with_gemini(raw_products, keyword, target_limit, custom_rules=""
             rule_text = f"""
             ATURAN DEFAULT (Sangat Ketat):
             - PRIORITAS MUTLAK: Hanya pilih produk yang BENAR-BENAR merupakan item utama dari keyword "{keyword}".
+            - TOLAK BEDA SERI: Jika user mencari tipe bernomor (contoh "iPhone 13"), maka SECARA TEGAS TOLAK tipe lain (seperti iPhone 11, 12, 14, 15).
             - TOLAK SEMUA produk pendamping (aksesoris, casing, kabel, tempered glass, dll) KECUALI keyword tersebut memang secara eksplisit menyebutkan nama aksesorisnya (misal: "casing iphone 17").
-            - Kualitas data lebih penting daripada kuantitas. Jika dari daftar hanya ada 1 produk yang benar-benar sesuai dengan keyword utama, KEMBALIKAN 1 SAJA. Jangan pernah mengisi sisa kuota dengan aksesoris yang tidak relevan.
+            - Kualitas data lebih penting daripada kuantitas. Jika dari daftar hanya ada 1 produk yang benar-benar sesuai dengan keyword utama, KEMBALIKAN 1 SAJA. Jangan pernah mengisi sisa kuota dengan aksesoris atau tipe yang salah.
             """
 
         prompt = f"""Kamu adalah filter mesin pencari e-commerce tingkat lanjut. User mencari produk: "{keyword}".

@@ -5,6 +5,8 @@ import urllib.parse
 from playwright.sync_api import sync_playwright
 import time
 from ai_agent import filter_urls_with_gemini
+import random
+import math
 
 # --- FUNGSI UTILITAS ---
 def parse_shopee_metric(text_value):
@@ -18,6 +20,53 @@ def parse_shopee_metric(text_value):
         elif suffix in ['k', 'rb', 'ribu']: return int(number * 1000)
         return int(number)
     return 0
+
+
+# --- FUNGSI ANTI-BOT: ALGORITMA KURVA BEZIER ---
+def cubic_bezier(t, p0, p1, p2, p3):
+    """Menghitung titik koordinat pada kurva lengkung."""
+    return (1-t)**3 * p0 + 3 * (1-t)**2 * t * p1 + 3 * (1-t) * t**2 * p2 + t**3 * p3
+
+def human_click(page, locator):
+    """Menggerakkan mouse dengan kurva lengkung sebelum menekan tombol."""
+    box = locator.bounding_box()
+    if box:
+        # Tentukan titik target secara acak di dalam area tombol (tidak selalu di tengah)
+        target_x = box['x'] + (box['width'] * random.uniform(0.3, 0.7))
+        target_y = box['y'] + (box['height'] * random.uniform(0.3, 0.7))
+        
+        # Mulai dari posisi acak di layar
+        start_x = random.randint(100, 800)
+        start_y = random.randint(100, 600)
+        
+        # Tentukan 2 titik kontrol untuk menarik garis menjadi melengkung
+        cp1_x = start_x + (target_x - start_x) * random.uniform(0.1, 0.5) + random.randint(-100, 100)
+        cp1_y = start_y + (target_y - start_y) * random.uniform(0.1, 0.5) + random.randint(-100, 100)
+        
+        cp2_x = start_x + (target_x - start_x) * random.uniform(0.5, 0.9) + random.randint(-100, 100)
+        cp2_y = start_y + (target_y - start_y) * random.uniform(0.5, 0.9) + random.randint(-100, 100)
+        
+        # Simulasikan gerakan frame per frame
+        steps = random.randint(15, 30)
+        for i in range(steps + 1):
+            t = i / steps
+            x = cubic_bezier(t, start_x, cp1_x, cp2_x, target_x)
+            y = cubic_bezier(t, start_y, cp1_y, cp2_y, target_y)
+            page.mouse.move(x, y)
+            time.sleep(random.uniform(0.005, 0.015)) # Kecepatan gerak bervariasi
+            
+        # Jeda mikrosekon (seperti manusia memastikan kursor sudah pas) lalu klik
+        time.sleep(random.uniform(0.1, 0.3))
+        locator.click(force=True)
+        time.sleep(random.uniform(0.2, 0.5))
+
+def human_scroll(page, scroll_times=8):
+    """Melakukan gulir halaman (scroll) dengan jarak dan jeda yang tidak tertebak."""
+    for _ in range(scroll_times):
+        scroll_amount = random.randint(600, 1400) # Jarak scroll acak
+        page.mouse.wheel(0, scroll_amount)
+        time.sleep(random.uniform(0.8, 2.2)) # Jeda baca acak
+
 
 # --- FUNGSI 1: MATA-MATA PROFIL TOKO KOMPETITOR ---
 def scrape_shop_profile(username):
@@ -151,9 +200,7 @@ def get_competitor_urls(keyword, limit=10, location=""):
         scroll_attempts = (limit // 10) + 3 
         print(f"Menggulir halaman {scroll_attempts} kali untuk memuat {limit} produk...")
         
-        for _ in range(scroll_attempts):
-            page.mouse.wheel(0, 1500)
-            time.sleep(1.5)
+        human_scroll(page, scroll_times=12)
         
         try:
             elements = page.locator("a[href*='-i.']").element_handles()
@@ -184,7 +231,12 @@ def get_store_product_urls(username, keyword="", limit=10, is_all=False, custom_
     page_number = 0 
     
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False, channel="chrome", args=["--disable-blink-features=AutomationControlled"]) 
+        # Gunakan args tambahan untuk mempercepat kinerja di jaringan lambat
+        browser = p.chromium.launch(
+            headless=False, 
+            channel="chrome", 
+            args=["--disable-blink-features=AutomationControlled", "--disable-images", "--no-sandbox"]
+        ) 
         context = browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
             viewport={"width": 1920, "height": 1080}
@@ -206,135 +258,156 @@ def get_store_product_urls(username, keyword="", limit=10, is_all=False, custom_
         page.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
 
         # =========================================================
-        # TAHAP A: NORMALISASI USERNAME ORGANIK VIA UI SEARCH
+        # TAHAP A: NORMALISASI USERNAME ORGANIK VIA UI SEARCH (ANTI-LAG)
         # =========================================================
         true_username = username
         search_url = f"https://shopee.co.id/search?keyword={urllib.parse.quote(username)}"
         
         try:
             print(f"🔍 Mengecek keabsahan nama toko '{username}' di mesin pencari Shopee...")
-            page.goto(search_url, timeout=45000, wait_until="domcontentloaded")
-            time.sleep(3)
+            # PENTING: Gunakan timeout yang lebih panjang (60 detik) untuk jaringan lambat
+            page.goto(search_url, timeout=60000, wait_until="domcontentloaded")
             
-            # Sikat pop-up bahasa jika muncul
+            # Waktu tunggu ekstra agar elemen pencarian selesai dimuat
+            time.sleep(5) 
+            
+            # Sikat pop-up bahasa jika muncul di layar utama (Pastikan BUKAN dropdown header)
             try:
-                lang_btn = page.locator('button').filter(has_text="Bahasa Indonesia").first
-                if lang_btn.is_visible(timeout=2000): 
-                    lang_btn.click()
-                    time.sleep(1)
+                # Mengincar teks "Bahasa Indonesia" yang ADA DI DALAM elemen pop-up/dialog
+                lang_btn = page.locator("div[role='dialog']").get_by_text("Bahasa Indonesia", exact=True).first
+                if lang_btn.is_visible(timeout=3000): 
+                    human_click(page, lang_btn)
+                    time.sleep(2)
             except: pass
 
-            # 1. Cek Auto-Correct Shopee ("Apakah kamu mencari: ...") menggunakan Regex
-            koreksi_teks = page.locator("div, span").filter(has_text=re.compile(r"Apakah kamu mencari:", re.IGNORECASE)).last
-            if koreksi_teks.is_visible(timeout=3000):
-                print("💡 Shopee mendeteksi typo! Mengklik saran perbaikan dari Shopee...")
-                saran_link = koreksi_teks.locator("a").first
-                if saran_link.is_visible():
-                    saran_link.click()
-                    time.sleep(4) # Tunggu hasil pencarian yang baru dimuat
+            # 1. Cek Auto-Correct Shopee ("Apakah kamu mencari: ...")
+            try:
+                koreksi_teks = page.locator("div, span").filter(has_text=re.compile(r"Apakah kamu mencari:", re.IGNORECASE)).last
+                if koreksi_teks.is_visible(timeout=5000):
+                    print("💡 Shopee mendeteksi typo! Mengklik saran perbaikan dari Shopee...")
+                    saran_link = koreksi_teks.locator("a").first
+                    if saran_link.is_visible():
+                        human_click(page, saran_link)
+                        # Tunggu halaman selesai dimuat ulang (networkidle)
+                        page.wait_for_load_state("networkidle", timeout=30000)
+                        time.sleep(4) 
+            except: pass
             
-            # 2. Tangkap username resmi dari Kartu Toko berdasarkan parameter "Pengikut"
-            print("🕵️ Mencari Kartu Toko berdasarkan parameter 'Pengikut'...")
-            # Kita filter tag <a> yang memiliki teks "Pengikut" di dalamnya
-            store_card = page.locator("a").filter(has_text=re.compile(r"Pengikut", re.IGNORECASE)).first
+            # 2. Tangkap username resmi dari Kartu Toko (Official Store Card)
+            print("🕵️ Mencari Kartu Toko resmi di hasil pencarian...")
+            # Kita cari elemen profil toko (bisa menggunakan parameter "Pengikut" ATAU "Produk" untuk jaga-jaga)
+            store_card = page.locator("a").filter(has_text=re.compile(r"Pengikut|Produk", re.IGNORECASE)).first
             
-            if store_card.is_visible(timeout=4000):
+            if store_card.is_visible(timeout=10000): # Tunggu maksimal 10 detik untuk Kartu Toko
                 href = store_card.get_attribute("href")
                 if href:
-                    # href bentuknya: /iboxofficial?entryPoint=ShopBySearch...
-                    # Kita potong string-nya untuk mengambil username aslinya saja
                     raw_name = href.split('?')[0].strip('/')
-                    
-                    # Memastikan yang ditangkap bukan URL search halaman lain
+                    # Mencegah menangkap URL yang salah
                     if raw_name and "search" not in raw_name.lower():
                         true_username = raw_name
-                        print(f"🎯 Username resmi ditemukan dari Kartu Toko UI: '{true_username}'")
+                        print(f"🎯 Username resmi divalidasi dari UI: '{true_username}'")
             else:
-                print(f"⚠️ Kartu toko khusus tidak ditemukan. Tetap menggunakan: '{true_username}'")
+                # --- PLAN B (Hardcoded Fallback) ---
+                # Jika UI benar-benar gagal dimuat karena lag, gunakan daftar perbaikan manual (Kamus Mini)
+                kamus_typo = {"ibox": "iboxofficial", "queenphone": "queenphonee"}
+                if username.lower() in kamus_typo:
+                    true_username = kamus_typo[username.lower()]
+                    print(f"⚠️ UI Lagging! Menggunakan Kamus Mini: '{username}' -> '{true_username}'")
+                else:
+                    print(f"⚠️ Kartu toko khusus tidak ditemukan. Terpaksa menggunakan: '{true_username}'")
                 
         except Exception as e:
-            print(f"⚠️ Gagal melakukan validasi UI, menggunakan input awal. Info: {e}")
+            print(f"⚠️ Gagal melakukan validasi UI secara total. Info: {e}")
+            # Fallback terakhir menggunakan Kamus Mini
+            kamus_typo = {"ibox": "iboxofficial", "queenphone": "queenphonee"}
+            true_username = kamus_typo.get(username.lower(), username)
+
+        # Lanjut ke TAHAP B menggunakan true_username...
 
         # =========================================================
-        # TAHAP B: MENGGUNAKAN UI SEARCH ATAU TAB SEMUA PRODUK
+        # TAHAP B: MENGGUNAKAN UI SEARCH ATAU TAB SEMUA PRODUK (ANTI-NYASAR)
         # =========================================================
         base_shop_url = f"https://shopee.co.id/{true_username}"
         print(f"\n📄 Membuka beranda toko {true_username} untuk inisialisasi...")
-        
+
         try:
-            page.goto(base_shop_url, timeout=60000, wait_until="domcontentloaded")
+            page.goto(base_shop_url, timeout=60000, wait_until="networkidle") # Gunakan networkidle agar loading benar-benar selesai
             time.sleep(4)
-            
-            # Sikat pop-up bahasa jika muncul
+
+            # Sikat pop-up bahasa jika muncul (Lebih Tahan Lag)
             try:
-                lang_btn = page.locator('button').filter(has_text="Bahasa Indonesia").first
-                if lang_btn.is_visible(timeout=2000): 
-                    lang_btn.click()
-                    time.sleep(1)
+                time.sleep(2) # Beri nafas ekstra agar JavaScript pop-up Shopee sempat termuat saat lag
+                # Cari elemen dengan tag apapun yang teksnya persis "Bahasa Indonesia"
+                lang_btn = page.get_by_text("Bahasa Indonesia", exact=True).first
+                if lang_btn.is_visible(timeout=5000): # Perpanjang waktu toleransi pencarian pop-up menjadi 5 detik
+                    human_click(page, lang_btn)
+                    time.sleep(1.5)
             except: pass
 
             if keyword:
-                print(f"🔎 Mengetik kata kunci '{keyword}' di kolom pencarian toko...")
-                # Cari input pencarian utama Shopee di header atas
-                search_input = page.locator("input.shopee-searchbar-input__input").first
-                search_input.fill(keyword)
-                time.sleep(1)
-                search_input.press("Enter")
-                time.sleep(5) # Tunggu Shopee mengarahkan ke halaman hasil pencarian toko
+                print(f"🔎 Mengetik kata kunci '{keyword}' di dalam toko...")
                 
-                # Ambil URL hasil pencarian yang sudah digenerate otomatis oleh sistem Shopee!
+                # Gunakan CSS selector yang SUPER SPESIFIK untuk kolom pencarian toko
+                # (mencegah klik kolom pencarian global Shopee)
+                shop_search_input = page.locator("div.shop-search-input input, div.shopee-shop-search-input input, input[placeholder*='toko']").first
+                
+                if shop_search_input.is_visible(timeout=10000):
+                    shop_search_input.fill(keyword)
+                    time.sleep(1)
+                    shop_search_input.press("Enter")
+                    
+                    # Tunggu hingga halaman selesai memuat hasil pencarian (menghindari lag)
+                    page.wait_for_load_state("networkidle", timeout=30000)
+                    time.sleep(5)
+                else:
+                    print("⚠️ Kolom pencarian toko tidak ditemukan, mencoba merakit URL pencarian manual...")
+                    # Fallback URL jika input pencarian tidak ditemukan di layar
+                    encoded_kw = urllib.parse.quote(keyword)
+                    page.goto(f"https://shopee.co.id/{true_username}?keyword={encoded_kw}&sortBy=pop", wait_until="networkidle")
+                    time.sleep(5)
+
                 scrape_base_url = page.url
-                print(f"✅ URL pencarian berhasil di-generate: {scrape_base_url}")
+                
+                # VALIDASI ANTI-NYASAR: Pastikan URL saat ini MASIH berada di dalam lingkup toko
+                if "search?keyword=" in scrape_base_url and "shop=" not in scrape_base_url and true_username not in scrape_base_url:
+                    print("🚨 BAHAYA: Robot terlempar ke pencarian global Shopee! Melakukan hard-reset URL...")
+                    encoded_kw = urllib.parse.quote(keyword)
+                    scrape_base_url = f"https://shopee.co.id/{true_username}?keyword={encoded_kw}&sortBy=pop"
+                    page.goto(scrape_base_url, wait_until="domcontentloaded")
+                    time.sleep(4)
+                
+                print(f"✅ URL pencarian terverifikasi: {scrape_base_url}")
+                
             else:
                 print("🛒 Membuka tab 'Semua Produk'...")
                 try:
                     tab_semua = page.locator("a, div").filter(has_text=re.compile(r"^(Semua Produk|All Products)$", re.IGNORECASE)).last
-                    if tab_semua.is_visible(timeout=3000):
-                        tab_semua.click()
-                        time.sleep(3)
+                    if tab_semua.is_visible(timeout=5000):
+                        human_click(page, tab_semua)
+                        page.wait_for_load_state("networkidle")
                 except: pass
                 scrape_base_url = f"https://shopee.co.id/{true_username}?sortBy=pop"
 
         except Exception as e:
-            print(f"❌ Error navigasi awal toko: {e}")
-            scrape_base_url = f"https://shopee.co.id/{true_username}?sortBy=pop"
+            print(f"❌ Error navigasi awal toko (Lag Network): {e}")
+            # Jika semua gagal karena lag, paksa rakit URL secara manual
+            encoded_kw = urllib.parse.quote(keyword) if keyword else ""
+            param = f"?keyword={encoded_kw}&sortBy=pop" if keyword else "?sortBy=pop"
+            scrape_base_url = f"https://shopee.co.id/{true_username}{param}"
 
         # =========================================================
-        # TAHAP C: LOOPING PAGINASI (MENYAPU BARANG)
+        # TAHAP C: LOOPING PAGINASI BERBASIS UI (KLIK TOMBOL NEXT)
         # =========================================================
         while len(product_links) < target_limit:
             
-            # Rakit URL dinamis dengan page yang aman
-            separator = "&" if "?" in scrape_base_url else "?"
-            current_url = f"{scrape_base_url}{separator}page={page_number}"
-            
-            if page_number > 0: # Halaman 1 sudah dimuat di Tahap B, tidak perlu refresh
-                print(f"\n📄 Memindai etalase Halaman {page_number + 1}: {current_url}")
-                try:
-                    page.goto(current_url, timeout=60000, wait_until="domcontentloaded")
-                    time.sleep(4) 
-                    
-                    # --- PERBAIKAN: Deteksi layar kosong hasil pencarian Shopee ---
-                    empty_state = page.locator("div").filter(has_text=re.compile(r"Produk tidak ditemukan di toko ini", re.IGNORECASE)).first
-                    if empty_state.is_visible(timeout=2000):
-                        print("🛑 Pencarian habis! Shopee mengatakan tidak ada produk lagi di halaman ini.")
-                        break # Langsung putus loop, berikan berapapun hasil yang sudah didapat
-                    # --------------------------------------------------------------
-                        
-                except Exception as e:
-                    print(f"Info navigasi toko: {e}")
-            else:
-                print(f"\n📄 Memindai etalase Halaman 1...")
+            print(f"\n📄 Memindai etalase Halaman {page_number + 1}...")
 
             page.mouse.click(5, 5)
             time.sleep(1)
 
             print(f"Menggulir untuk merender produk di halaman {page_number + 1}...")
-            # Kita tambah scroll sedikit agar lazy-load Shopee memuat SEMUA kartu di halaman 1
-            for _ in range(12): 
-                page.mouse.wheel(0, 1500)
-                time.sleep(1)
-                
+            human_scroll(page, scroll_times=12)
+
             js_code = """
             () => {
                 let items = [];
@@ -369,29 +442,50 @@ def get_store_product_urls(username, keyword="", limit=10, is_all=False, custom_
                 
                 print(f"📊 Progres Sementara: Terkumpul {len(product_links)} / {target_limit} produk target.")
                 
+                # JIKA TARGET BELUM TERCAPAI, CARI DAN KLIK TOMBOL "NEXT PAGE"
+                if len(product_links) < target_limit:
+                    try:
+                        # Mencari tombol panah kanan (Next) di sistem paginasi Shopee Mall
+                        next_btn = page.locator("button.shopee-icon-button--right").first
+                        
+                        if next_btn.is_visible(timeout=3000) and not next_btn.is_disabled():
+                            print("➡️ Menuju ke halaman selanjutnya...")
+                            human_click(page, next_btn)
+                            page.wait_for_load_state("networkidle", timeout=20000)
+                            time.sleep(3)
+                            page_number += 1
+                        else:
+                            print("🛑 Tombol Next tidak tersedia atau ini adalah halaman terakhir. Pencarian selesai.")
+                            break
+                    except Exception as e:
+                        print(f"⚠️ Gagal pindah halaman via UI: {e}")
+                        break
+                else:
+                    break # Keluar loop jika target sudah terpenuhi
+                
             except Exception as e:
                 print(f"Error saat ekstrak link pakai JS: {e}")
                 break
-            
-            page_number += 1
             
         browser.close()
             
     print(f"✅ Filter Final: {len(product_links)} link produk dari toko {true_username} akan diteruskan ke Scraper Utama.")
     return product_links
 
-# --- FUNGSI 3: MENARIK DATA PRODUK ---
+# --- FUNGSI 3: MENARIK DATA PRODUK (VERSI CEPAT TANPA CEK STOK) ---
 def scrape_shopee_playwright(product_url):
     print(f"Mengakses: {product_url}")
     result_data = None 
 
     with sync_playwright() as p:
+        # Konfigurasi browser standar (Nanti akan kita ubah ke Persistent Context)
         browser = p.chromium.launch(headless=False, channel="chrome", args=["--disable-blink-features=AutomationControlled"])
         context = browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
             viewport={"width": 1920, "height": 1080}
         )
 
+        # (Logika muat kuki cookies_env / cookies.json masih dipertahankan sementara di sini)
         cookies_env = os.getenv("SHOPEE_COOKIES")
         if cookies_env:
             try:
@@ -406,7 +500,7 @@ def scrape_shopee_playwright(product_url):
 
         page = context.new_page()
         page.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
-        
+
         extracted_data = {'api_info': None, 'shop_name_api': None, 'api_data_full': {}}
 
         def handle_response(response):
@@ -431,16 +525,17 @@ def scrape_shopee_playwright(product_url):
             page.goto(product_url, timeout=45000)
         except: pass 
 
+        # --- SIKAT POP-UP BAHASA ---
         try:
-            lang_btn = page.locator('button').filter(has_text="Bahasa Indonesia").first
-            if lang_btn.is_visible(timeout=3000):
-                lang_btn.click()
-                time.sleep(1)
+            time.sleep(2)
+            lang_btn = page.locator("div[role='dialog']").get_by_text("Bahasa Indonesia", exact=True).first
+            if lang_btn.is_visible(timeout=5000):
+                human_click(page, lang_btn)
+                time.sleep(1.5)
         except: pass
 
-        print("Menggulir halaman produk...")
-        page.mouse.wheel(0, 800)
-        time.sleep(3)
+        # Gulir sedikit untuk simulasi manusia dan memicu API memuat ulasan
+        human_scroll(page, scroll_times=4)
 
         try:
             full_page_text = page.inner_text("body")
@@ -478,85 +573,19 @@ def scrape_shopee_playwright(product_url):
                 image_hash = info.get('image', '')
                 image_url = f"https://cf.shopee.co.id/file/{image_hash}" if image_hash else ""
 
-                # --- 1. EKSTRAKSI STOK CERDAS (ANTI-NYASAR) ---
+                # --- EKSTRAKSI VARIAN CEPAT DARI JSON (TANPA CEK STOK) ---
                 models = info.get('models', [])
                 parsed_variants = []
-                total_variant_stock = 0
-                
-                print("🕵️ Membaca varian dan kuantitas presisi dari layar...")
-                
-                # KUNCI 1: Kembalikan layar ke paling atas agar tidak membaca produk rekomendasi
-                page.evaluate("window.scrollTo(0, 0)")
-                time.sleep(0.5)
 
                 for model in models:
                     v_name = model.get('name') or "Default"
-                    v_has_stock = model.get('has_stock', False)
-                    v_stock = 0
-                    
-                    if not v_has_stock:
-                        v_stock = 0
-                    else:
-                        btn_labels = [label.strip() for label in v_name.split(',')]
-                        
-                        # A. Klik Varian
-                        for label in btn_labels:
-                            try:
-                                btn = page.locator('button').filter(has_text=re.compile(f"^{re.escape(label)}$", re.IGNORECASE)).first
-                                if btn.is_visible(timeout=1000):
-                                    btn.click(force=True, timeout=1000)
-                                    time.sleep(0.5) # Tunggu DOM Shopee merender angka
-                            except Exception:
-                                pass
-                        
-                        # B. Ekstrak Angka Menggunakan DOM JavaScript (Super Presisi)
-                        js_extract_stock = """
-                        () => {
-                            // Trik 1: Cari elemen berlabel "Kuantitas" lalu ambil angka di sebelahnya
-                            let labels = Array.from(document.querySelectorAll('div, span')).filter(e => e.innerText && e.innerText.trim().match(/^(Kuantitas|Quantity)$/i));
-                            if (labels.length > 0) {
-                                let parent = labels[0].parentElement.parentElement;
-                                if (parent) {
-                                    let match = parent.innerText.match(/Tersedia\\s*(\\d+)/i);
-                                    if (match) return parseInt(match[1]);
-                                }
-                            }
-                            
-                            // Trik 2: Fallback cari elemen tunggal yang isinya persis "Tersedia xxx"
-                            let allDivs = document.querySelectorAll('div');
-                            for (let d of allDivs) {
-                                if (d.childNodes.length === 1 && d.innerText && d.innerText.match(/^Tersedia\\s*\\d+$/i)) {
-                                    let match = d.innerText.match(/Tersedia\\s*(\\d+)/i);
-                                    if (match) return parseInt(match[1]);
-                                }
-                            }
-                            return 1; // Fallback jika benar-benar tersembunyi
-                        }
-                        """
-                        try:
-                            v_stock = page.evaluate(js_extract_stock)
-                        except Exception:
-                            v_stock = 1
-
                     parsed_variants.append({
                         "variant_name": v_name,
                         "price": model.get('price', 0) / 100000,
-                        "stock": v_stock
+                        "stock": 0  # Stok dipukul rata 0 agar cepat dan tidak ribet
                     })
-                    total_variant_stock += v_stock
 
-                # --- 2. PERBAIKAN STOK TOTAL ---
-                if len(parsed_variants) > 0:
-                    stock_count = total_variant_stock
-                else:
-                    try:
-                        raw_total_stock = info.get('stock_display') or info.get('stock_displayed') or info.get('stock')
-                        stock_count = int(raw_total_stock) if raw_total_stock else 0
-                    except:
-                        stock_count = 0
-
-                # --- 3. PEMBUNGKUSAN DATA AKHIR ---
-
+                # --- PEMBUNGKUSAN DATA AKHIR ---
                 result_data = {
                     "shop_name": shop_name, 
                     "username": shop_username,
@@ -567,9 +596,9 @@ def scrape_shopee_playwright(product_url):
                     "image_url": image_url,
                     "location": shop_location_api,
                     "shop_location_fallback": shop_location_api,
-                    "stock": total_variant_stock,   # Total stok diambil dari JSON (contoh: 8 atau 121)
+                    "stock": 0, # Stok utama dipukul rata 0
                     "platform": "Shopee",
-                    "variants": parsed_variants, # Varian berisi stok riil (contoh: Silver 256GB bernilai 7)
+                    "variants": parsed_variants,
                     "source_url": product_url,
                     "nib": nib_value,
                     "followers": followers_count,
@@ -578,7 +607,7 @@ def scrape_shopee_playwright(product_url):
                 }
 
         except Exception as e:
-            print(f"Error saat mengekstrak teks produk: {e}")
+            print(f"Error saat mengekstrak data produk: {e}")
         finally:
             browser.close()
             
