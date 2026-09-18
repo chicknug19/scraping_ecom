@@ -206,7 +206,8 @@ def run_scraper(req: ScrapeRequest):
         result = run_scrape(
             search_type=1,
             keywords=req.keyword,
-            target_count=req.limit
+            target_count=req.limit,
+            location=req.location or ""
         )
 
         return {
@@ -269,7 +270,8 @@ def run_store_scraper(req: StoreScrapeRequest):
             result = run_scrape(
                 search_type=2,
                 keywords=task.username.strip(),
-                target_count=task.limit
+                product_keyword=task.keyword.strip(),
+                target_count=1000 if task.isAll else task.limit
             )
             summaries.append(result)
 

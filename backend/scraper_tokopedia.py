@@ -29,15 +29,11 @@ DB_NAME = os.getenv("DB_NAME")
 DB_USER = os.getenv("DB_USER")
 DB_PASS = os.getenv("DB_PASS")
 
-# Not in the .env keys you gave me, so it's hardcoded here rather
-# than invented as another required env var. If your machine has a
-# different ODBC driver installed (check via `odbcinst -j` / ODBC
-# Data Source Administrator), change this constant.
+
 ODBC_DRIVER = "{ODBC Driver 17 for SQL Server}"
 
-# Safety cap so the scroll loop can't run forever if the site
-# stops returning new valid products before target_count is hit.
-MAX_BATCHES = 40
+
+MAX_BATCHES = 100
 
 
 def build_driver():
@@ -216,6 +212,7 @@ def get_or_create_store_id(cursor, shop_name: str, shop_stats: dict, username: s
             SET FollowersCount = ?,
                 TotalProducts = ?,
                 Rating = ?,
+                Platform = 'Tokopedia',
                 LastUpdated = GETDATE()
             WHERE StoreID = ?
             """,
@@ -231,9 +228,9 @@ def get_or_create_store_id(cursor, shop_name: str, shop_stats: dict, username: s
     cursor.execute(
         """
         INSERT INTO dbo.Stores
-            (Username, ShopName, FollowersCount, TotalProducts, Rating)
+            (Username, ShopName, FollowersCount, TotalProducts, Rating, Platform)
         OUTPUT INSERTED.StoreID
-        VALUES (?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, 'Tokopedia')
         """,
         username,
         shop_name,
@@ -273,13 +270,14 @@ def extract_image_url(link_element):
 def extract_variants_from_pdp(driver, product_url):
     """
     Visits a Tokopedia Product Detail Page (PDP) and extracts all available
-    variants, shop stats, and product total ratings.
+    variants, shop stats, product total ratings, and base stock.
     """
     driver.get(product_url)
     variants = []
     resolved_url = product_url
     shop_stats = {"Rating": 0.0, "FollowersCount": 0, "TotalProducts": 0}
     total_ratings = None
+    base_stock = 0  # NEW: Track general stock for items without variants
 
     try:
         WebDriverWait(driver, 10).until(
@@ -293,43 +291,41 @@ def extract_variants_from_pdp(driver, product_url):
         if path in ("", "/") or path.startswith("/search"):
             print(f"WARNING: could not resolve PDP for {product_url} "
                   f"(redirected to {resolved_url})")
-            return variants, resolved_url, shop_stats, total_ratings
+            return variants, resolved_url, shop_stats, total_ratings, base_stock
 
         try:
             body_text = driver.find_element(By.TAG_NAME, "body").text
+
+            # Get the base stock right away
+            stock_match = re.search(
+                r"(?:stok\s*total|stok|sisa)[\s:]*(?:sisa\s*)?(\d+)",
+                body_text,
+                re.IGNORECASE
+            )
+            base_stock = int(stock_match.group(1)) if stock_match else 0
             
-            # Extract Shop Rating and Followers: e.g., "4.9 (22 rb)"
+            # Extract Shop Rating and Followers
             rating_match = re.search(r"(\d\.\d)\s*\(([\d.,]+\s*(?:rb|jt)?)\)", body_text, re.IGNORECASE)
             if rating_match:
                 shop_stats["Rating"] = float(rating_match.group(1))
                 shop_stats["FollowersCount"] = parse_sold_to_number(rating_match.group(2)) or 0
             
-            # Extract Shop Total Products: e.g., "1569 total barang"
+            # Extract Shop Total Products
             products_match = re.search(r"([\d.,]+)\s*total barang", body_text, re.IGNORECASE)
             if products_match:
                 raw_num = products_match.group(1).replace(".", "").replace(",", "")
                 shop_stats["TotalProducts"] = int(raw_num)
 
-            # NEW: Extract Product Total Ratings: e.g., "(2.777 rating)"
-            # Extract Shop Total Products: e.g., "1569 total barang"
-            products_match = re.search(r"([\d.,]+)\s*total barang", body_text, re.IGNORECASE)
-            if products_match:
-                raw_num = products_match.group(1).replace(".", "").replace(",", "")
-                shop_stats["TotalProducts"] = int(raw_num)
-
-            # NEW: Extract Product Total Ratings
-            # Method 1: Explicit CSS Selector (Most Reliable)
+            # Explicit CSS Selector for Total Ratings
             try:
                 rating_elem = driver.find_element(By.CSS_SELECTOR, 'span[data-testid="lblPDPDetailProductRatingCounter"]')
-                
-                # Grabs the number inside the parentheses, ignoring whatever word comes after it
                 rating_match = re.search(r"\(([\d.,]+\s*(?:rb|jt)?)[^)]*\)", rating_elem.text.strip(), re.IGNORECASE)
                 if rating_match:
                     total_ratings = parse_sold_to_number(rating_match.group(1))
             except Exception:
                 pass
             
-            # Method 2: Regex Fallback on body_text (Expanded to catch "ulasan", "penilaian", etc.)
+            # Regex Fallback on body_text for Total Ratings
             if total_ratings is None:
                 product_rating_match = re.search(
                     r"\(([\d.,]+\s*(?:rb|jt)?)\s*(?:rating|ulasan|penilaian|reviews?)\)", 
@@ -367,11 +363,17 @@ def extract_variants_from_pdp(driver, product_url):
                     children = component.get('data', [{}])[0].get('children', [])
                     for child in children:
                         variants.append({
-                            "VariantName": child.get('optionName') or child.get('name'),
-                            "Price": int(child.get('price', 0))
+                            "VariantName": child.get("optionName") or child.get("name"),
+                            "Price": int(child.get("price", 0)),
+                            "Stock": int(
+                                child.get("stock")
+                                or child.get("stockCount")
+                                or child.get("inventory")
+                                or 0
+                            )
                         })
                     if variants:
-                        return variants, resolved_url, shop_stats, total_ratings
+                        return variants, resolved_url, shop_stats, total_ratings, base_stock
 
     except Exception as e:
         print(f"Error reading JSON state for {product_url}: {e}")
@@ -389,25 +391,32 @@ def extract_variants_from_pdp(driver, product_url):
                 continue
 
             driver.execute_script("arguments[0].click();", elem)
-            time.sleep(1.0)
+            time.sleep(1.0) # Wait for page stock/price to update
 
             try:
                 price_elem = driver.find_element(By.CSS_SELECTOR, 'div[data-testid="lblPDPDetailProductPrice"]')
-                price_text = price_elem.text.strip()
-                parsed_price = parse_price_to_number(price_text)
+                parsed_price = parse_price_to_number(price_elem.text.strip())
             except Exception as e:
                 parsed_price = None
-                print(f"Could not fetch price for variant {v_name}: {e}")
+
+            # NEW: Extract stock specific to this variant after clicking
+            try:
+                body_text_variant = driver.find_element(By.TAG_NAME, "body").text
+                parsed_stock = parse_stock_to_number(body_text_variant)
+            except Exception:
+                parsed_stock = 0
 
             variants.append({
                 "VariantName": v_name,
                 "Price": parsed_price,
+                "Stock": parsed_stock
             })
 
     except Exception as e:
         print(f"Error fallback parsing for {product_url}: {e}")
 
-    return variants, resolved_url, shop_stats, total_ratings
+    # Return base_stock alongside the rest
+    return variants, resolved_url, shop_stats, total_ratings, base_stock
 
 
 def extract_shop_and_location_from_html(raw_html):
@@ -458,6 +467,16 @@ def extract_shop_and_location_from_html(raw_html):
         print(f"Shop/location extraction error: {e}")
         return None, None
 
+def parse_stock_to_number(stock_text):
+    if stock_text is None:
+        return 0
+
+    match = re.search(
+        r"(?:stok\s*total|stok|sisa)[\s:]*(?:sisa\s*)?(\d+)", 
+        str(stock_text), 
+        re.IGNORECASE
+    )
+    return int(match.group(1)) if match else 0
 
 def parse_sold_to_number(sold_str):
     if not sold_str:
@@ -583,6 +602,33 @@ def parse_product(href, link_element, raw_html=None, global_shop_name=None, glob
         print("Error extracting product:", e)
         return None
 
+def try_click_next_page(driver):
+    """
+    Attempts to find and click Tokopedia's 'Next Page' button.
+    Returns True if successfully clicked, False otherwise.
+    """
+    # Common CSS selectors for Tokopedia's 'Next Page' (>) button
+    selectors = [
+        'button[aria-label="Laman berikutnya"]',
+        'button[aria-label="Next page"]',
+        'button[data-testid="btnShopProductPageNext"]'
+    ]
+    
+    for selector in selectors:
+        try:
+            elements = driver.find_elements(By.CSS_SELECTOR, selector)
+            for btn in elements:
+                # Ensure the button is visible and hasn't been disabled (which happens on the very last page)
+                if btn.is_displayed() and btn.is_enabled():
+                    # Scroll it into view and use JavaScript to click (bypasses UI overlay blocks)
+                    driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", btn)
+                    time.sleep(0.5)
+                    driver.execute_script("arguments[0].click();", btn)
+                    return True
+        except Exception:
+            continue
+            
+    return False
 
 def extract_data(driver, target_count, seen_links, product_data, global_shop_name=None, global_location=None):
     """
@@ -632,7 +678,17 @@ def extract_data(driver, target_count, seen_links, product_data, global_shop_nam
         else:
             stable_rounds += 1
             if stable_rounds >= max_stable_rounds:
-                print("No more products loading, stopping scroll.")
+                # Reached the bottom of the current page, let's try to go to the next page
+                print("\nReached bottom of page. Looking for 'Next Page' button...")
+                
+                if try_click_next_page(driver):
+                    print("Clicked 'Next Page'. Loading new items...")
+                    stable_rounds = 0  # Reset our stuck counter for the new page
+                    time.sleep(4)      # Give Tokopedia time to render the next 80 items
+                    continue           # Jump to the next batch iteration
+                
+                # If we get here, there are no more pages left to click
+                print("No more pages found. Stopping scrape.")
                 break
 
     print(f"Extracted {len(product_data)} products.")
@@ -666,12 +722,14 @@ def insert_item(cursor, item: dict) -> int:
             UPDATE dbo.Items
             SET ShopName = ?, Location = ?, RatingStar = ?,
                 TotalRatings = ?, TotalSold = ?, ImageURL = ?,
-                SourceURL = ?, ScrapedAt = ?
+                SourceURL = ?, ScrapedAt = ?, Platform = ?, Stock = ?
             WHERE ItemCode = ?
             """,
             item["ShopName"], item["Location"], item["RatingStar"],
             item["TotalRatings"], item["TotalSold"], item["ImageURL"],
-            item["SourceURL"], item["ScrapedAt"], item_code
+            item["SourceURL"], item["ScrapedAt"], 
+            item["Platform"], item["Stock"], # <- Missing variables added here
+            item_code
         )
         return item_code
     else:
@@ -680,13 +738,14 @@ def insert_item(cursor, item: dict) -> int:
             """
             INSERT INTO dbo.Items
                 (ItemName, ShopName, Location, RatingStar,
-                 TotalRatings, TotalSold, ImageURL, SourceURL, ScrapedAt, StoreID)
+                 TotalRatings, TotalSold, ImageURL, SourceURL, ScrapedAt, StoreID, Platform, Stock)
             OUTPUT INSERTED.ItemCode
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             item["ItemName"], item["ShopName"], item["Location"],
             item["RatingStar"], item["TotalRatings"], item["TotalSold"],
-            item["ImageURL"], item["SourceURL"], item["ScrapedAt"], item["StoreID"]
+            item["ImageURL"], item["SourceURL"], item["ScrapedAt"], item["StoreID"],
+            item["Platform"], item["Stock"] # <- Missing variables added here
         )
         return cursor.fetchone()[0]
 
@@ -694,7 +753,7 @@ def insert_item(cursor, item: dict) -> int:
 def insert_variant(cursor, variant: dict):
     """
     Checks if a variant with the same ItemCode and VariantName exists.
-    If it exists, updates the Price. If not, inserts the new variant.
+    If it exists, updates the Price and Stock. If not, inserts the new variant.
     """
     # 1. Check if this specific variant already exists under the parent ItemCode
     cursor.execute(
@@ -707,32 +766,53 @@ def insert_variant(cursor, variant: dict):
     row = cursor.fetchone()
 
     if row:
-        # 2a. Update the price of the existing variant
+        # 2a. Update the price and stock of the existing variant
         cursor.execute(
             """
             UPDATE dbo.ItemVariants
-            SET Price = ?
+            SET Price = ?, Stock = ?
             WHERE VariantID = ?
             """,
-            variant["Price"], row[0]
+            variant["Price"], variant.get("Stock", 0), row[0] # <- Stock variable added here
         )
     else:
         # 2b. Insert the new variant
         cursor.execute(
             """
             INSERT INTO dbo.ItemVariants
-                (ItemCode, VariantName, Price)
-            VALUES (?, ?, ?)
+                (ItemCode, VariantName, Price, Stock)
+            VALUES (?, ?, ?, ?)
             """,
-            variant["ItemCode"], variant["VariantName"], variant["Price"]
+            variant["ItemCode"], variant["VariantName"], variant["Price"], variant.get("Stock", 0) # <- Placeholder and Stock variable added here
         )
 
+def get_tokopedia_city_id(location_text: str) -> str:
+    """
+    Maps a text-based location from the UI to Tokopedia's numeric fcity ID.
+    """
+    if not location_text:
+        return ""
+        
+    # Mapping for the first 5 locations
+    mapping = {
+        "dki jakarta": "174,175,176,177,178,179",
+        "kota bandung": "165",
+        "kota surabaya": "252",
+        "kota tangerang": "171",  # NOTE: Check if 171 is perfectly accurate for Tangerang
+        "kota medan": "46"
+    }
+    
+    # Clean the string so it matches safely regardless of capitalization
+    clean_text = location_text.strip().lower()
+    
+    # Return the numeric ID, or an empty string if it's not in the dictionary
+    return mapping.get(clean_text, "")
 
 # ============================================================
 # ENTRY POINT (called from main.py)
 # ============================================================
 
-def run_scrape(search_type: int, keywords: str, target_count: int) -> dict:
+def run_scrape(search_type: int, keywords: str, target_count: int, location: str = "", product_keyword: str = "") -> dict:
     """
     Runs one full scrape based on search_type:
       - search_type = 1: Search by Keyword
@@ -762,9 +842,32 @@ def run_scrape(search_type: int, keywords: str, target_count: int) -> dict:
                 slug = raw_input.replace("@", "").strip().lower().replace(" ", "-")
 
             search_url = f"https://www.tokopedia.com/{slug}/product"
-            mode_desc = f"Shop Mode ('{slug}')"
+            if product_keyword.strip():
+                search_url += f"?q={quote(product_keyword.strip())}"
+
+            mode_desc = (
+                f"Shop Mode ('{slug}')"
+                + (
+                    f" - Product Filter ('{product_keyword.strip()}')"
+                    if product_keyword.strip()
+                    else ""
+                )
+            )
         else:
-            search_url = f"https://www.tokopedia.com/search?q={quote(keywords)}&ob=5"
+            search_url = (
+                f"https://www.tokopedia.com/search"
+                f"?q={quote(keywords)}&ob=5"
+            )
+
+            # --- NEW LOCATION FILTER LOGIC ---
+            if location and location.lower() != "semua lokasi (default)":
+                city_id = get_tokopedia_city_id(location)
+                if city_id:
+                    search_url += f"&fcity={quote(city_id)}"
+                else:
+                    print(f"Warning: Location '{location}' not in map. Skipping filter.")
+            # ---------------------------------
+
             mode_desc = f"Keyword Mode ('{keywords}')"
 
         driver.get(search_url)
@@ -777,8 +880,6 @@ def run_scrape(search_type: int, keywords: str, target_count: int) -> dict:
         global_shop_name = None
         global_location = None
 
-        # If we are scraping a shop page, pull the header info once globally
-        # If we are scraping a shop page, pull the header info once globally
         if search_type == 2:
             try:
                 shop_page_details = driver.execute_script("""
@@ -960,7 +1061,7 @@ def run_scrape(search_type: int, keywords: str, target_count: int) -> dict:
 
             details_url = row["details_link"]
 
-            extracted_variants, resolved_source_url, shop_stats, total_ratings = extract_variants_from_pdp(
+            extracted_variants, resolved_source_url, shop_stats, total_ratings, base_stock = extract_variants_from_pdp(
                 driver, details_url
             )
 
@@ -968,14 +1069,21 @@ def run_scrape(search_type: int, keywords: str, target_count: int) -> dict:
             if resolved_path in ("", "/") or resolved_path.startswith("/search"):
                 unresolved_links += 1
 
-            # Scraped shop name is always used as Username
             shop_name = row["shop_display_name"] or row["shop_name"]
 
+            # 1. Apply Default variant first (injecting base_stock)
             if not extracted_variants:
                 extracted_variants = [{
                     "VariantName": "Default",
                     "Price": parse_price_to_number(row["price_raw"]),
+                    "Stock": base_stock 
                 }]
+
+            # 2. Calculate Total Stock AFTER we know extracted_variants is populated
+            total_stock = sum(
+                variant.get("Stock", 0) or 0
+                for variant in extracted_variants
+            )
 
             try:
                 if search_type == 2:
@@ -1001,6 +1109,8 @@ def run_scrape(search_type: int, keywords: str, target_count: int) -> dict:
                     "SourceURL": resolved_source_url,
                     "ScrapedAt": scraped_at,
                     "StoreID": store_id,
+                    "Platform": "Tokopedia",
+                    "Stock": total_stock,
                 }
 
                 new_item_code = insert_item(cursor, item_record)
