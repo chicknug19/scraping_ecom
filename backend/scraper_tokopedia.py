@@ -15,6 +15,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
+from urllib.parse import quote, urlsplit, urlunsplit, urlparse, parse_qs, urlencode, urlunparse
 
 from tqdm import tqdm
 
@@ -77,36 +78,36 @@ def get_db_connection():
 # SCROLLING
 # ============================================================
 
-def scroll_one_batch(driver, batch_number):
-    """
-    Runs a single scroll batch (gradual step-down scroll so
-    Tokopedia's IntersectionObserver-based lazy load fires) and
-    reports back whether new content actually loaded.
+# def scroll_one_batch(driver, batch_number):
+#     """
+#     Runs a single scroll batch (gradual step-down scroll so
+#     Tokopedia's IntersectionObserver-based lazy load fires) and
+#     reports back whether new content actually loaded.
 
-    Returns True if the page grew after this batch, False if it
-    looks like nothing new loaded.
-    """
+#     Returns True if the page grew after this batch, False if it
+#     looks like nothing new loaded.
+#     """
 
-    print(f"Scroll batch {batch_number + 1}...")
+#     print(f"Scroll batch {batch_number + 1}...")
 
-    last_height = driver.execute_script("return document.body.scrollHeight")
-    viewport_height = driver.execute_script("return window.innerHeight")
-    current_scroll = driver.execute_script("return window.pageYOffset")
+#     last_height = driver.execute_script("return document.body.scrollHeight")
+#     viewport_height = driver.execute_script("return window.innerHeight")
+#     current_scroll = driver.execute_script("return window.pageYOffset")
 
-    target_scroll = current_scroll + viewport_height * 4
+#     target_scroll = current_scroll + viewport_height * 4
 
-    while current_scroll < target_scroll:
-        current_scroll += viewport_height
-        driver.execute_script(f"window.scrollTo(0, {current_scroll});")
-        time.sleep(0.8)
+#     while current_scroll < target_scroll:
+#         current_scroll += viewport_height
+#         driver.execute_script(f"window.scrollTo(0, {current_scroll});")
+#         time.sleep(0.8)
 
-    try:
-        WebDriverWait(driver, 10).until(
-            lambda d: d.execute_script("return document.body.scrollHeight") > last_height
-        )
-        return True
-    except Exception:
-        return False
+#     try:
+#         WebDriverWait(driver, 10).until(
+#             lambda d: d.execute_script("return document.body.scrollHeight") > last_height
+#         )
+#         return True
+#     except Exception:
+#         return False
 
 
 # ============================================================
@@ -602,54 +603,97 @@ def parse_product(href, link_element, raw_html=None, global_shop_name=None, glob
         print("Error extracting product:", e)
         return None
 
+# ============================================================
+# SCROLLING & NAVIGATION
+# ============================================================
+
+def fast_scroll_to_bottom(driver):
+    """
+    Fast step-down scroll to trigger Tokopedia's IntersectionObserver
+    lazy-loading down to the current end of the page.
+    """
+    viewport_height = driver.execute_script("return window.innerHeight") or 800
+    last_height = driver.execute_script("return document.body.scrollHeight")
+    current_scroll = driver.execute_script("return window.pageYOffset")
+    
+    while current_scroll < last_height:
+        current_scroll += viewport_height * 2
+        driver.execute_script(f"window.scrollTo(0, {current_scroll});")
+        time.sleep(0.3)
+        last_height = driver.execute_script("return document.body.scrollHeight")
+
+
 def try_click_next_page(driver):
     """
-    Attempts to find and click Tokopedia's 'Next Page' button.
+    Attempts to find and click Tokopedia's 'Next Page' or 'Muat Lebih Banyak' button.
     Returns True if successfully clicked, False otherwise.
     """
-    # Common CSS selectors for Tokopedia's 'Next Page' (>) button
     selectors = [
+        # Keyword / Product Search Load More buttons
+        '//button[contains(., "Muat Lebih Banyak")]',
+        '//span[contains(., "Muat Lebih Banyak")]/parent::button',
+        # Store / Standard Pagination buttons
+        '[data-testid="lsnPagingNext"]',
+        '[data-testid="btnShopProductPageNext"]',
         'button[aria-label="Laman berikutnya"]',
+        'a[aria-label="Laman berikutnya"]',
         'button[aria-label="Next page"]',
-        'button[data-testid="btnShopProductPageNext"]'
+        'a[aria-label="Next page"]'
     ]
     
     for selector in selectors:
         try:
-            elements = driver.find_elements(By.CSS_SELECTOR, selector)
+            if selector.startswith('//'):
+                elements = driver.find_elements(By.XPATH, selector)
+            else:
+                elements = driver.find_elements(By.CSS_SELECTOR, selector)
+                
             for btn in elements:
-                # Ensure the button is visible and hasn't been disabled (which happens on the very last page)
-                if btn.is_displayed() and btn.is_enabled():
-                    # Scroll it into view and use JavaScript to click (bypasses UI overlay blocks)
-                    driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", btn)
-                    time.sleep(0.5)
-                    driver.execute_script("arguments[0].click();", btn)
+                is_disabled = btn.get_attribute("disabled") or btn.get_attribute("aria-disabled") == "true"
+                
+                if btn.is_displayed() and not is_disabled:
+                    driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", btn)
+                    time.sleep(1.0)
+                    
+                    try:
+                        btn.click()
+                    except Exception:
+                        driver.execute_script("arguments[0].click();", btn)
+                        
                     return True
         except Exception:
             continue
             
     return False
 
-def extract_data(driver, target_count, seen_links, product_data, global_shop_name=None, global_location=None):
+
+def extract_data(driver, target_count, seen_links, product_data, global_shop_name=None, global_location=None, search_type=1):
     """
-    Scrolls and extracts incrementally, batch by batch, stopping
-    as soon as `target_count` valid products have been collected.
+    Streamlined extraction loop:
+    1. Fast sweep scroll to trigger lazy loading.
+    2. Extract all newly rendered products.
+    3. Directly click Next / Load More without intermediate batch delays.
+    4. Store Mode (search_type == 2): Resets scroll to top for new page.
+    5. Keyword Mode (search_type == 1): Continues scrolling down from current position.
     """
     print("\nLoading page...")
+    
+    max_pages = 50
+    page_count = 1
 
-    stable_rounds = 0
-    max_stable_rounds = 3
-
-    for batch in range(MAX_BATCHES):
-
-        grew = scroll_one_batch(driver, batch)
+    while len(product_data) < target_count and page_count <= max_pages:
+        print(f"\n--- Processing Page/Batch {page_count} ---")
+        
+        # 1. Fast scroll down to trigger lazy loading for all rendered products on current view
+        fast_scroll_to_bottom(driver)
         time.sleep(1)
 
+        # 2. Extract candidate products
         candidates = get_candidate_links(driver)
         new_hrefs = [href for href in candidates if href not in seen_links]
 
-        for href in tqdm(new_hrefs, desc=f"Parsing batch {batch + 1}"):
-
+        new_added = 0
+        for href in tqdm(new_hrefs, desc=f"Parsing items (Page {page_count})"):
             seen_links.add(href)
             element = candidates[href]
 
@@ -658,42 +702,50 @@ def extract_data(driver, target_count, seen_links, product_data, global_shop_nam
             except Exception:
                 raw_html = None
 
-            # Pass the global variables down to parse_product
             data = parse_product(href, element, raw_html, global_shop_name, global_location)
 
             if data is not None:
                 product_data.append(data)
+                new_added += 1
 
             if len(product_data) >= target_count:
                 break
 
-        print(f"Collected {len(product_data)}/{target_count} valid products so far...")
+        print(f"Collected {len(product_data)}/{target_count} valid products so far... (+{new_added} new)")
 
         if len(product_data) >= target_count:
-            print("Target count reached, stopping scroll.")
+            print("Target count reached, stopping scrape.")
             break
 
-        if grew:
-            stable_rounds = 0
+        # 3. Directly click Next / Load More
+        print("Looking for Next Page / Load More button...")
+        clicked = try_click_next_page(driver)
+        
+        if not clicked:
+            # Scroll to absolute bottom once more in case the button wasn't in viewport
+            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            time.sleep(1)
+            clicked = try_click_next_page(driver)
+
+        if clicked:
+            print("Successfully clicked Next/Load More button. Waiting for content to render...")
+            time.sleep(3.5)
+            
+            if search_type == 2:
+                # Store Mode: Hard page replacement -> reset scroll to top
+                print("Store Mode: Resetting scroll to top for new page.")
+                driver.execute_script("window.scrollTo(0, 0);")
+                time.sleep(1)
+            else:
+                # Keyword Mode: Items appended -> stay at current position
+                print("Keyword Mode: Continuing scroll from current position.")
+                
+            page_count += 1
         else:
-            stable_rounds += 1
-            if stable_rounds >= max_stable_rounds:
-                # Reached the bottom of the current page, let's try to go to the next page
-                print("\nReached bottom of page. Looking for 'Next Page' button...")
-                
-                if try_click_next_page(driver):
-                    print("Clicked 'Next Page'. Loading new items...")
-                    stable_rounds = 0  # Reset our stuck counter for the new page
-                    time.sleep(4)      # Give Tokopedia time to render the next 80 items
-                    continue           # Jump to the next batch iteration
-                
-                # If we get here, there are no more pages left to click
-                print("No more pages found. Stopping scrape.")
-                break
+            print("No more 'Next Page' or 'Muat Lebih Banyak' buttons found. Stopping scrape.")
+            break
 
-    print(f"Extracted {len(product_data)} products.")
-
-
+    print(f"Extracted {len(product_data)} products total.")
 # ============================================================
 # DATABASE WRITES
 # ============================================================
@@ -1044,7 +1096,8 @@ def run_scrape(search_type: int, keywords: str, target_count: int, location: str
         print("=" * 60)
 
         # Pass global elements down
-        extract_data(driver, target_count, seen_links, product_data, global_shop_name, global_location)
+        # Pass global elements down AND search_type
+        extract_data(driver, target_count, seen_links, product_data, global_shop_name, global_location, search_type)
 
         raw_df = pd.DataFrame(product_data)
 
