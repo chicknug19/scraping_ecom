@@ -8,6 +8,10 @@ from ai_agent import filter_urls_with_gemini
 import random
 import math
 
+# IMPORT BARU: OpenCV untuk Computer Vision & Numpy
+import cv2
+import numpy as np
+
 # IMPORT BARU: Mengambil fungsi pengirim email
 from email_notifier import send_captcha_alert
 
@@ -66,15 +70,124 @@ def human_scroll(page, scroll_times=8):
         time.sleep(random.uniform(0.8, 2.2))
 
 
-# --- FUNGSI CEK BLOKIR (REUSABLE) ---
-def check_for_block(page, toko_target, produk_ke):
-    """Mengecek apakah layar memutih atau dialihkan ke halaman login/captcha"""
+# --- FUNGSI ANTI-BOT: DRAG AND DROP (GESER PUZZLE) ---
+def human_drag(page, start_x, start_y, distance_x):
+    """Menahan dan menggeser slider puzzle secara natural menyerupai tangan manusia."""
+    page.mouse.move(start_x, start_y)
+    time.sleep(random.uniform(0.1, 0.3))
+    page.mouse.down() # Tahan klik kiri
+    time.sleep(random.uniform(0.1, 0.4))
+    
+    target_x = start_x + distance_x
+    target_y = start_y + random.uniform(-3, 3) # Sedikit goyang di sumbu Y
+    
+    # Gerakan menggeser perlahan dengan perlambatan di akhir (Ease-out)
+    steps = random.randint(25, 45)
+    for i in range(1, steps + 1):
+        t = i / steps
+        ease_t = 1 - pow(1 - t, 3) # Rumus ease-out cubic
+        current_x = start_x + (target_x - start_x) * ease_t
+        current_y = start_y + random.uniform(-1.5, 1.5)
+        
+        page.mouse.move(current_x, current_y)
+        time.sleep(random.uniform(0.01, 0.04))
+        
+    time.sleep(random.uniform(0.3, 0.7))
+    page.mouse.up() # Lepas klik
+    print("🧩 Puzzle dilepaskan!")
+    time.sleep(3) # Tunggu loading verifikasi Shopee
+
+
+# --- FUNGSI PENYELESAI CAPTCHA (OPENCV) ---
+def solve_captcha_slider(page):
+    """Mendeteksi gambar puzzle, menghitung jarak dengan CV2, dan menggeser slider."""
+    print("🤖 Menjalankan Computer Vision untuk memecahkan Captcha...")
     try:
-        # Pengecekan Hard Block (Layar Putih) atau Soft Block (Login/Verify)
-        if page.get_by_text("Informasi gagal diterima", exact=False).is_visible(timeout=2000) or "verify" in page.url or "login" in page.url:
-            print("🚨 HARD BLOCK ATAU CAPTCHA TERDETEKSI!")
+        # Cari iframe Datadome/Shopee Captcha
+        iframe_element = page.locator('iframe[src*="captcha"], iframe[src*="verify"]').first
+        
+        if iframe_element.is_visible(timeout=5000):
+            frame = iframe_element.content_frame
+        else:
+            frame = page
+
+        # Ambil elemen Background dan Potongan Puzzle
+        bg_img = frame.locator('img[alt*="background"], .background-img, .captcha-bg, .captcha-image').first
+        piece_img = frame.locator('img[alt*="puzzle"], .piece-img, .jigsaw, .captcha-jigsaw-piece').first
+        slider_btn = frame.locator('.slider, .sec-slider, .slider-button, .captcha-slider-btn').first
+        
+        if not bg_img.is_visible(timeout=5000) or not slider_btn.is_visible():
+            print("⚠️ Elemen gambar puzzle atau slider tidak ditemukan di layar.")
+            return False
+
+        print("📸 Mengambil screenshot puzzle...")
+        bg_img.screenshot(path="captcha_bg.png")
+        piece_img.screenshot(path="captcha_piece.png")
+        
+        # Proses Gambar dengan OpenCV
+        bg = cv2.imread("captcha_bg.png", cv2.IMREAD_GRAYSCALE)
+        piece = cv2.imread("captcha_piece.png", cv2.IMREAD_GRAYSCALE)
+        
+        # Canny Edge Detection (Deteksi Garis Tepi)
+        bg_edges = cv2.Canny(bg, 100, 200)
+        piece_edges = cv2.Canny(piece, 100, 200)
+        
+        # Template Matching untuk mencari lokasi lubang
+        res = cv2.matchTemplate(bg_edges, piece_edges, cv2.TM_CCOEFF_NORMED)
+        min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+        
+        distance = max_loc[0] 
+        print(f"🎯 Computer Vision mendeteksi lubang di jarak: {distance} px")
+        
+        # Kalibrasi jarak layar vs resolusi gambar asli
+        bg_box = bg_img.bounding_box()
+        slider_box = slider_btn.bounding_box()
+        
+        scale_ratio = bg_box['width'] / bg.shape[1] 
+        actual_distance = distance * scale_ratio
+        
+        # Lakukan penggeseran (Drag and Drop)
+        start_x = slider_box['x'] + (slider_box['width'] / 2)
+        start_y = slider_box['y'] + (slider_box['height'] / 2)
+        
+        human_drag(page, start_x, start_y, actual_distance)
+        
+        # Bersihkan file sampah
+        if os.path.exists("captcha_bg.png"): os.remove("captcha_bg.png")
+        if os.path.exists("captcha_piece.png"): os.remove("captcha_piece.png")
+        
+        return True
+
+    except Exception as e:
+        print(f"❌ CV2 Captcha Solver gagal: {e}")
+        return False
+
+
+# --- FUNGSI CEK BLOKIR (REUSABLE & AUTONOMOUS) ---
+def check_for_block(page, toko_target, produk_ke):
+    """Mengecek apakah layar memutih atau dialihkan ke halaman captcha, lalu mencoba melawannya!"""
+    try:
+        if "verify" in page.url or "captcha" in page.url:
+            print("🚨 SOFT BLOCK TERDETEKSI! Halaman verifikasi muncul.")
+            
+            # Coba kerjakan secara otomatis pakai AI Computer Vision
+            sukses = solve_captcha_slider(page)
+            
+            if sukses:
+                time.sleep(3)
+                if "verify" not in page.url and "captcha" not in page.url:
+                    print("✅ Captcha berhasil dipecahkan oleh Computer Vision! Melanjutkan tugas...")
+                    return False # Tidak jadi blokir, jalan terus!
+            
+            print("❌ CV2 Gagal memecahkan puzzle. Mengirim alarm email...")
             send_captcha_alert(toko_target=toko_target, url_terakhir=page.url, produk_ke=produk_ke)
             return True
+            
+        elif page.get_by_text("Informasi gagal diterima", exact=False).is_visible(timeout=2000) or "login" in page.url:
+            print("🚨 HARD BLOCK / HALAMAN RUSAK / LOGIN DIMINTA!")
+            send_captcha_alert(toko_target=toko_target, url_terakhir=page.url, produk_ke=produk_ke)
+            return True
+            
     except: pass
     return False
 
@@ -430,10 +543,9 @@ def scrape_shopee_playwright(product_url):
         try:
             page.goto(product_url, timeout=45000)
             
-            # --- CEK AWAL ---
             if check_for_block(page, "Ekstraksi Produk", product_url):
                 context.close()
-                return {"status": "BLOCKED"} # KIRIM SINYAL KE MAIN.PY
+                return {"status": "BLOCKED"} 
                 
         except: pass 
 
@@ -447,11 +559,9 @@ def scrape_shopee_playwright(product_url):
 
         human_scroll(page, scroll_times=4)
         
-        # --- CEK KEDUA (MENANGKAP LATE REDIRECT) ---
         if check_for_block(page, "Ekstraksi Produk (Post-Scroll)", product_url):
             context.close()
-            return {"status": "BLOCKED"} # KIRIM SINYAL KE MAIN.PY
-        # ---------------------------------------------
+            return {"status": "BLOCKED"} 
 
         try:
             full_page_text = page.inner_text("body")
@@ -470,33 +580,50 @@ def scrape_shopee_playwright(product_url):
                 full_data = extracted_data['api_data_full'] 
                     
                 item_name = info.get('name') or info.get('title', 'Nama tidak ditemukan')
-                rating_star = info.get('item_rating', {}).get('rating_star', 0.0)
                 
-                shop_detailed = full_data.get('shop_detailed', {}) or info.get('shop_detailed', {})
+                # --- PERBAIKAN LOGIKA NULL/NONE ---
+                item_rating_obj = info.get('item_rating') or {}
+                rating_star = item_rating_obj.get('rating_star')
+                rating_star = float(rating_star) if rating_star is not None else 0.0
+                
+                shop_detailed = full_data.get('shop_detailed') or info.get('shop_detailed') or {}
                 shop_location_api = info.get('shop_location') or shop_detailed.get('shop_location') or 'Tidak Diketahui'
                 
-                review_data = info.get('product_review', {})
+                review_data = info.get('product_review') or {}
                 
-                total_ratings_raw = str(review_data.get('total_rating_count') or review_data.get('rating_count', [0])[0] or backup_ratings)
+                # Pencegahan error jika rating_count mengembalikan list kosong
+                rating_count_arr = review_data.get('rating_count')
+                rating_count_val = rating_count_arr[0] if isinstance(rating_count_arr, list) and len(rating_count_arr) > 0 else 0
+                
+                total_ratings_raw = str(review_data.get('total_rating_count') or rating_count_val or backup_ratings)
                 sold_raw = str(review_data.get('historical_sold_display') or review_data.get('historical_sold') or info.get('historical_sold') or backup_sold)
                     
-                shop_name = shop_detailed.get('name', extracted_data['shop_name_api'] or 'Toko Tidak Ditemukan')
-                shop_username = shop_detailed.get('account', {}).get('username', '')
-                followers_count = shop_detailed.get('follower_count', 0)
-                total_products = shop_detailed.get('item_count', 0)
-                shop_rating = shop_detailed.get('rating_star', 0.0)
+                shop_name = shop_detailed.get('name') or extracted_data['shop_name_api'] or 'Toko Tidak Ditemukan'
+                
+                account_obj = shop_detailed.get('account') or {}
+                shop_username = account_obj.get('username') or ''
+                
+                followers_count = shop_detailed.get('follower_count') or 0
+                total_products = shop_detailed.get('item_count') or 0
+                
+                shop_rating = shop_detailed.get('rating_star')
+                shop_rating = float(shop_rating) if shop_rating is not None else 0.0
+                # -----------------------------------
 
                 image_hash = info.get('image', '')
                 image_url = f"https://cf.shopee.co.id/file/{image_hash}" if image_hash else ""
 
-                models = info.get('models', [])
+                models = info.get('models') or []
                 parsed_variants = []
 
                 for model in models:
                     v_name = model.get('name') or "Default"
+                    v_price = model.get('price')
+                    v_price = (v_price / 100000) if v_price is not None else 0
+                    
                     parsed_variants.append({
                         "variant_name": v_name,
-                        "price": model.get('price', 0) / 100000,
+                        "price": v_price,
                         "stock": 0 
                     })
 
@@ -521,7 +648,7 @@ def scrape_shopee_playwright(product_url):
                 }
 
         except Exception as e:
-            print(f"Error saat mengekstrak data produk: {e}")
+            print(f"❌ Error saat mengekstrak data produk: {e}")
         finally:
             context.close()
             
