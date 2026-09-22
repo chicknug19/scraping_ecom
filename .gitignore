@@ -19,5 +19,28 @@ build/
 .vscode/
 .idea/
 
+# Credentials & Session
 cookies.json
-ShopeeBotProfile
+ShopeeBotProfile/
+shopee_state.json
+
+# Scraping Outputs & Debug Files
+downloads/
+debug_api_product.json
+debug_api_shop.json
+debug_prooduk.json
+raw_order_*.json
+raw_orders.json
+
+# Credentials & Session
+backend/cookies.json
+backend/ShopeeBotProfile/
+backend/shopee_state.json
+
+# Scraping Outputs & Debug Files
+backend/downloads/
+backend/debug_api_product.json
+backend/debug_api_shop.json
+backend/debug_prooduk.json
+backend/raw_order_*.json
+backend/raw_orders.json

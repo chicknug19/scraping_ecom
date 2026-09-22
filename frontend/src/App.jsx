@@ -3,7 +3,7 @@ import ReactMarkdown from 'react-markdown';
 import './App.css';
 
 export default function App() {
-  // --- STATE UNTUK SCRAPING ---
+  // --- STATE UNTUK SCRAPING KOMPETITOR ---
   const [keyword, setKeyword] = useState('');
   const [limit, setLimit] = useState(10);
   const [location, setLocation] = useState(''); 
@@ -11,7 +11,7 @@ export default function App() {
   const [scrapedData, setScrapedData] = useState([]);
   
   // State untuk Scraper Toko (Dinamis & AI)
-  const [isSmartMode, setIsSmartMode] = useState(true); // Toggle AI Mode
+  const [isSmartMode, setIsSmartMode] = useState(true);
   const [smartPrompt, setSmartPrompt] = useState("");
   const [storeTasks, setStoreTasks] = useState([
     { username: "", keyword: "", limit: 10, isAll: false }
@@ -24,9 +24,14 @@ export default function App() {
   const [aiLoading, setAiLoading] = useState(false);
   const [aiResponse, setAiResponse] = useState('');
 
+  // --- STATE BARU: MANAJEMEN PESANAN SELLER (EXCEL) ---
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [isSellerLoading, setIsSellerLoading] = useState(false);
+
+  // --- FUNGSI SCRAPING PENCARIAN ---
   const handleScrape = async () => {
     if (!keyword) return alert("Masukkan keyword terlebih dahulu!");
-    
     setLoading(true);
     setScrapedData([]);
 
@@ -34,11 +39,7 @@ export default function App() {
         const response = await fetch('http://localhost:8000/api/scrape', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                keyword, 
-                limit: parseInt(limit),
-                location 
-            })
+            body: JSON.stringify({ keyword, limit: parseInt(limit), location })
         });
         
         const data = await response.json();
@@ -53,52 +54,15 @@ export default function App() {
     setLoading(false);
   };
 
-  // --- FUNGSI AI CHAT ---
-  const handleTemplateClick = (templateText) => {
-    setPrompt(templateText);
-  };
-
-  const handleChatAI = async () => {
-    if (!prompt) return alert("Ketikkan instruksi untuk AI terlebih dahulu!");
-    
-    setAiLoading(true);
-    setAiResponse(''); 
-
-    try {
-        const response = await fetch('http://localhost:8000/api/analyze', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ user_prompt: prompt })
-        });
-        
-        const data = await response.json();
-        if (data.ai_response) {
-            setAiResponse(data.ai_response);
-        } else if (data.error) {
-            setAiResponse(`Error: ${data.error}`);
-        }
-    } catch (error) {
-        console.error("Terjadi kesalahan AI:", error);
-        setAiResponse("Gagal terhubung ke layanan AI.");
-    }
-    setAiLoading(false);
-  };
-
-  // FUNGSI MANAJEMEN FORM MANUAL
+  // --- FUNGSI SCRAPING TOKO (AI/MANUAL) ---
   const addTask = () => setStoreTasks([...storeTasks, { username: "", keyword: "", limit: 10, isAll: false }]);
-  
   const updateTask = (index, field, value) => {
     const newTasks = [...storeTasks];
     newTasks[index][field] = value;
     setStoreTasks(newTasks);
   };
-  
-  const removeTask = (index) => {
-    const newTasks = storeTasks.filter((_, i) => i !== index);
-    setStoreTasks(newTasks);
-  };
+  const removeTask = (index) => setStoreTasks(storeTasks.filter((_, i) => i !== index));
 
-  // FUNGSI SUBMIT TOKO (MENGGABUNGKAN MODE AI DAN MANUAL)
   const handleStoreScrape = async () => {
     setIsStoreLoading(true);
     setScrapedData([]); 
@@ -108,21 +72,12 @@ export default function App() {
       let payload = {};
 
       if (isSmartMode) {
-        if (!smartPrompt.trim()) {
-          alert("⚠️ Masukkan instruksi AI terlebih dahulu!");
-          setIsStoreLoading(false);
-          return;
-        }
-        // Kita akan membuat endpoint baru ini di backend nanti
+        if (!smartPrompt.trim()) return alert("⚠️ Masukkan instruksi AI terlebih dahulu!");
         endpoint = 'http://localhost:8000/api/scrape-smart'; 
         payload = { prompt: smartPrompt };
       } else {
         const validTasks = storeTasks.filter(t => t.username.trim() !== "");
-        if (validTasks.length === 0) {
-          alert("⚠️ Masukkan minimal 1 username toko!");
-          setIsStoreLoading(false);
-          return;
-        }
+        if (validTasks.length === 0) return alert("⚠️ Masukkan minimal 1 username toko!");
         endpoint = 'http://localhost:8000/api/scrape-stores';
         payload = { tasks: validTasks };
       }
@@ -135,18 +90,15 @@ export default function App() {
 
       const data = await response.json();
       
-      // LOGIKA NOTIFIKASI PINTAR
       if (data.results && data.results.length > 0) {
         setScrapedData(data.results);
         setShowResults(true);
         alert(`✅ Scraping selesai! Berhasil menarik ${data.results.length} produk.`);
       } else if (data.message) {
-        // AI Agent membalas dengan validasi (misal: "Berapa targetnya?")
         alert(`🤖 Pesan AI: ${data.message}`);
       } else {
-        alert(`ℹ️ Sudah berhasil mengambil informasi, tetapi tidak menemukan produk yang cocok.`);
+        alert(`ℹ️ Tidak menemukan produk yang cocok.`);
       }
-      
     } catch (error) {
       console.error("Error scraping stores:", error);
       alert("❌ Terjadi kesalahan saat menghubungi server.");
@@ -155,13 +107,98 @@ export default function App() {
     }
   };
 
+  // --- FUNGSI BARU: SCRAPE PESANAN SELLER (EXCEL) ---
+  const handleSellerScrape = async () => {
+    if (!startDate || !endDate) {
+        return alert("⚠️ Tolong pilih Tanggal Awal dan Tanggal Akhir terlebih dahulu!");
+    }
+    
+    setIsSellerLoading(true);
+    try {
+        const response = await fetch('http://localhost:8000/api/scrape-seller-orders', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                start_date: startDate, 
+                end_date: endDate 
+            })
+        });
+        
+        const data = await response.json();
+        alert(`✅ Ekstraksi Excel Selesai!\nPesan: ${data.message}\nTotal Pesanan: ${data.total_pesanan}`);
+    } catch (error) {
+        console.error("Error Seller Scrape:", error);
+        alert("❌ Gagal terhubung ke backend. Pastikan server FastAPI berjalan.");
+    }
+    setIsSellerLoading(false);
+  };
+
+  // --- FUNGSI AI CHAT ---
+  const handleTemplateClick = (templateText) => setPrompt(templateText);
+  const handleChatAI = async () => {
+    if (!prompt) return alert("Ketikkan instruksi untuk AI terlebih dahulu!");
+    setAiLoading(true);
+    setAiResponse(''); 
+
+    try {
+        const response = await fetch('http://localhost:8000/api/analyze', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_prompt: prompt })
+        });
+        const data = await response.json();
+        if (data.ai_response) setAiResponse(data.ai_response);
+        else if (data.error) setAiResponse(`Error: ${data.error}`);
+    } catch (error) {
+        console.error("Terjadi kesalahan AI:", error);
+        setAiResponse("Gagal terhubung ke layanan AI.");
+    }
+    setAiLoading(false);
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 p-8 font-sans">
       <div className="max-w-4xl mx-auto space-y-8">
         
-        {/* ================= PANEL KONTROL SCRAPING ================= */}
+        {/* ================= PANEL BARU: MANAJEMEN PESANAN SELLER ================= */}
+        <div className="bg-white p-6 rounded-lg shadow-md border-t-4 border-indigo-500">
+          <h1 className="text-2xl font-bold mb-4 text-indigo-600">📦 Manajemen Pesanan Internal (Lunadorii)</h1>
+          <p className="text-sm text-gray-500 mb-6">Tarik data pesanan pelanggan dari Shopee Seller Centre menggunakan sistem Mass Export Excel.</p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Tanggal Awal</label>
+              <input 
+                type="date" 
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="w-full border border-gray-300 rounded-md p-3 focus:ring-2 focus:ring-indigo-500 outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Tanggal Akhir</label>
+              <input 
+                type="date" 
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="w-full border border-gray-300 rounded-md p-3 focus:ring-2 focus:ring-indigo-500 outline-none"
+              />
+            </div>
+          </div>
+
+          <button 
+            onClick={handleSellerScrape}
+            disabled={isSellerLoading}
+            className={`w-full text-white font-bold py-3 px-4 rounded-md transition-colors ${isSellerLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'}`}
+          >
+            {isSellerLoading ? '⏳ Sedang Mengekstrak Laporan Excel...' : '📥 Mulai Tarik Laporan Pesanan'}
+          </button>
+        </div>
+
+
+        {/* ================= PANEL KONTROL SCRAPING (EXISTING) ================= */}
         <div className="bg-white p-6 rounded-lg shadow-md border-t-4 border-orange-500">
-          <h1 className="text-3xl font-bold mb-6 text-orange-500">Shopee Scraper by product</h1>
+          <h1 className="text-2xl font-bold mb-6 text-orange-500">Shopee Scraper by Product</h1>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <div>
@@ -210,15 +247,13 @@ export default function App() {
           </button>
         </div>
 
-
-        {/* CARD 3: SCRAPE BERDASARKAN TOKO (DINAMIS & AI) */}
+        {/* ================= PANEL SCRAPE BERDASARKAN TOKO (EXISTING) ================= */}
         <div className="bg-white p-6 rounded-lg shadow-md border-t-4 border-green-500 mb-6">
           <div className="flex flex-col md:flex-row justify-between items-center mb-6 border-b pb-4">
             <h2 className="text-xl font-bold text-green-600 mb-4 md:mb-0">
-              🏪 Scrape by store and Product
+              🏪 Scrape by Store and Product
             </h2>
             
-            {/* Toggle Mode */}
             <div className="flex bg-gray-200 rounded-lg p-1">
               <button 
                 onClick={() => setIsSmartMode(true)}
@@ -233,7 +268,6 @@ export default function App() {
             </div>
           </div>
 
-          {/* Render Konten Berdasarkan Mode */}
           {isSmartMode ? (
             <div className="mb-6 bg-green-50 p-5 rounded-lg border border-green-100">
               <label className="block text-sm font-bold text-gray-700 mb-2">Instruksi Scraping (Smart Prompt)</label>
@@ -255,57 +289,25 @@ export default function App() {
                   {storeTasks.length > 1 && (
                     <button onClick={() => removeTask(index)} className="absolute top-2 right-3 text-red-500 hover:text-red-700 font-bold">✕</button>
                   )}
-
                   <div className="w-full md:w-1/4">
                     <label className="block text-xs font-semibold text-gray-600 mb-1">Username Toko*</label>
-                    <input
-                      type="text"
-                      value={task.username}
-                      onChange={(e) => updateTask(index, 'username', e.target.value)}
-                      placeholder="Misal: iboxofficial"
-                      className="w-full border border-gray-300 rounded p-2 focus:border-green-500 text-sm"
-                    />
+                    <input type="text" value={task.username} onChange={(e) => updateTask(index, 'username', e.target.value)} placeholder="Misal: iboxofficial" className="w-full border border-gray-300 rounded p-2 focus:border-green-500 text-sm" />
                   </div>
-
                   <div className="w-full md:w-1/4">
                     <label className="block text-xs font-semibold text-gray-600 mb-1">Cari Produk (Opsional)</label>
-                    <input
-                      type="text"
-                      value={task.keyword}
-                      onChange={(e) => updateTask(index, 'keyword', e.target.value)}
-                      placeholder="Misal: iPhone 16"
-                      className="w-full border border-gray-300 rounded p-2 focus:border-green-500 text-sm"
-                    />
+                    <input type="text" value={task.keyword} onChange={(e) => updateTask(index, 'keyword', e.target.value)} placeholder="Misal: iPhone 16" className="w-full border border-gray-300 rounded p-2 focus:border-green-500 text-sm" />
                   </div>
-
                   <div className="w-full md:w-1/5">
                     <label className="block text-xs font-semibold text-gray-600 mb-1">Target Jumlah</label>
-                    <input
-                      type="number"
-                      value={task.limit}
-                      onChange={(e) => updateTask(index, 'limit', parseInt(e.target.value))}
-                      disabled={task.isAll}
-                      className={`w-full border rounded p-2 text-sm ${task.isAll ? 'bg-gray-200 text-gray-400' : 'border-gray-300 focus:border-green-500'}`}
-                    />
+                    <input type="number" value={task.limit} onChange={(e) => updateTask(index, 'limit', parseInt(e.target.value))} disabled={task.isAll} className={`w-full border rounded p-2 text-sm ${task.isAll ? 'bg-gray-200 text-gray-400' : 'border-gray-300 focus:border-green-500'}`} />
                   </div>
-
                   <div className="w-full md:w-auto flex items-center mb-2 ml-2">
-                    <input
-                      type="checkbox"
-                      checked={task.isAll}
-                      onChange={(e) => updateTask(index, 'isAll', e.target.checked)}
-                      className="mr-2 h-4 w-4 text-green-600 cursor-pointer"
-                    />
-                    <label className="text-sm text-gray-700 cursor-pointer" onClick={() => updateTask(index, 'isAll', !task.isAll)}>
-                      Ambil Semua (Get All)
-                    </label>
+                    <input type="checkbox" checked={task.isAll} onChange={(e) => updateTask(index, 'isAll', e.target.checked)} className="mr-2 h-4 w-4 text-green-600 cursor-pointer" />
+                    <label className="text-sm text-gray-700 cursor-pointer" onClick={() => updateTask(index, 'isAll', !task.isAll)}>Ambil Semua</label>
                   </div>
                 </div>
               ))}
-
-              <button onClick={addTask} className="text-sm text-blue-600 font-bold mb-4 hover:underline">
-                + Tambah Toko Lain
-              </button>
+              <button onClick={addTask} className="text-sm text-blue-600 font-bold mb-4 hover:underline">+ Tambah Toko Lain</button>
             </div>
           )}
 
@@ -320,31 +322,16 @@ export default function App() {
           </button>
         </div>
 
-        {/* ================= PANEL AI ASSISTANT ================= */}
+        {/* ================= PANEL AI ASSISTANT (EXISTING) ================= */}
         <div className="bg-white p-6 rounded-lg shadow-md border-t-4 border-blue-500">
           <h2 className="text-2xl font-bold mb-4 text-blue-600">🤖 Konsultan Harga AI</h2>
           
           <div className="mb-4">
             <p className="text-sm font-semibold text-gray-600 mb-2">Pilih Template Cepat:</p>
             <div className="flex flex-wrap gap-2">
-              <button 
-                onClick={() => handleTemplateClick("Berperanlah sebagai konsultan bisnis. Tolong cari data 'iphone 17' di database maksimal 20 data. Berikan saran harga jual yang bagus untuk menghadapi Mega Sale bulan depan.")}
-                className="bg-blue-50 text-blue-700 text-xs font-medium px-3 py-2 rounded border border-blue-200 hover:bg-blue-100 transition"
-              >
-                Template 1: Strategi Mega Sale
-              </button>
-              <button 
-                onClick={() => handleTemplateClick("Tolong cari data 'iphone 17' maksimal 30 data dari database. Buatkan ringkasan tren harga terendah, rata-rata, dan tertinggi dari berbagai lokasi.")}
-                className="bg-purple-50 text-purple-700 text-xs font-medium px-3 py-2 rounded border border-purple-200 hover:bg-purple-100 transition"
-              >
-                Template 2: Tren Harga Lokasi
-              </button>
-              <button 
-                onClick={() => handleTemplateClick("Cari data kompetitor untuk 'iphone 17' maksimal 50 data di database. Apakah ada outlier (harga yang terlalu murah/mahal yang tidak masuk akal)?")}
-                className="bg-green-50 text-green-700 text-xs font-medium px-3 py-2 rounded border border-green-200 hover:bg-green-100 transition"
-              >
-                Template 3: Deteksi Outlier Harga
-              </button>
+              <button onClick={() => handleTemplateClick("Berperanlah sebagai konsultan bisnis. Tolong cari data 'iphone 17' di database maksimal 20 data. Berikan saran harga jual yang bagus untuk menghadapi Mega Sale bulan depan.")} className="bg-blue-50 text-blue-700 text-xs font-medium px-3 py-2 rounded border border-blue-200 hover:bg-blue-100 transition">Template 1: Strategi Mega Sale</button>
+              <button onClick={() => handleTemplateClick("Tolong cari data 'iphone 17' maksimal 30 data dari database. Buatkan ringkasan tren harga terendah, rata-rata, dan tertinggi dari berbagai lokasi.")} className="bg-purple-50 text-purple-700 text-xs font-medium px-3 py-2 rounded border border-purple-200 hover:bg-purple-100 transition">Template 2: Tren Harga Lokasi</button>
+              <button onClick={() => handleTemplateClick("Cari data kompetitor untuk 'iphone 17' maksimal 50 data di database. Apakah ada outlier (harga yang terlalu murah/mahal yang tidak masuk akal)?")} className="bg-green-50 text-green-700 text-xs font-medium px-3 py-2 rounded border border-green-200 hover:bg-green-100 transition">Template 3: Deteksi Outlier Harga</button>
             </div>
           </div>
 
@@ -376,7 +363,6 @@ export default function App() {
                     p: ({node, ...props}) => <p className="mb-3" {...props} />,
                     ul: ({node, ...props}) => <ul className="list-disc pl-6 mb-3 space-y-1" {...props} />,
                     ol: ({node, ...props}) => <ol className="list-decimal pl-6 mb-3 space-y-1" {...props} />,
-                    li: ({node, ...props}) => <li className="" {...props} />,
                     strong: ({node, ...props}) => <strong className="font-semibold text-gray-900" {...props} />,
                   }}
                 >
@@ -387,7 +373,7 @@ export default function App() {
           )}
         </div>
 
-        {/* ================= PANEL HASIL SCRAPING (DROPDOWN) ================= */}
+        {/* ================= PANEL HASIL SCRAPING KOMPETITOR (EXISTING) ================= */}
         {scrapedData.length > 0 && (
           <div className="space-y-4">
             <div 

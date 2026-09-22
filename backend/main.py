@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from typing import Optional
 from google import genai
 from google.genai import types
+from seller_engine import get_seller_orders
 
 from ai_agent import filter_urls_with_gemini, parse_scraping_intent 
 from scraper_engine import get_competitor_urls, scrape_shopee_playwright, get_store_product_urls
@@ -280,6 +281,82 @@ def run_smart_store_scraper(req: SmartScrapeRequest):
         time.sleep(2)
 
     return {"message": "Selesai", "results": semua_data}
+
+
+# --- FUNGSI PENYIMPANAN DATABASE (PESANAN SELLER) ---
+def save_orders_to_db(orders_data):
+    if not orders_data:
+        return
+        
+    try:
+        server = os.getenv("DB_SERVER")
+        database = os.getenv("DB_NAME")
+        username = os.getenv("DB_USER")
+        password = os.getenv("DB_PASS")
+        driver = '{ODBC Driver 17 for SQL Server}'
+
+        conn_str = f'DRIVER={driver};SERVER={server};PORT=1433;DATABASE={database};UID={username};PWD={password}'
+        conn = pyodbc.connect(conn_str)
+        cursor = conn.cursor()
+
+        # Query MERGE untuk UPSERT (Anti Duplikat)
+        upsert_query = """
+        MERGE INTO ShopeeOrders AS target
+        USING (SELECT ? AS OrderSN, ? AS BuyerUsername, ? AS ItemName, ? AS SKU, ? AS ShippingAddress, ? AS City, ? AS Province, ? AS ShippingChannel) AS source
+        ON target.OrderSN = source.OrderSN AND target.SKU = source.SKU
+        
+        WHEN MATCHED THEN 
+            UPDATE SET 
+                BuyerUsername = source.BuyerUsername,
+                ItemName = source.ItemName,
+                ShippingAddress = source.ShippingAddress,
+                City = source.City,
+                Province = source.Province,
+                ShippingChannel = source.ShippingChannel,
+                LastUpdated = DATEADD(hour, 7, GETUTCDATE())
+                
+        WHEN NOT MATCHED THEN 
+            INSERT (OrderSN, BuyerUsername, ItemName, SKU, ShippingAddress, City, Province, ShippingChannel, LastUpdated)
+            VALUES (source.OrderSN, source.BuyerUsername, source.ItemName, source.SKU, source.ShippingAddress, source.City, source.Province, source.ShippingChannel, DATEADD(hour, 7, GETUTCDATE()));
+        """
+        
+        sukses = 0
+        for order in orders_data:
+            try:
+                cursor.execute(upsert_query, 
+                    order['order_sn'], order['username'], order['item_name'], 
+                    order['sku'], order['address'], order['city'], 
+                    order['province'], order['shipping_channel']
+                )
+                sukses += 1
+            except Exception as e:
+                print(f"❌ Gagal Upsert pesanan {order['order_sn']}: {e}")
+
+        conn.commit()
+        conn.close()
+        print(f"✅ [DB] Sukses upsert {sukses}/{len(orders_data)} pesanan ke tabel ShopeeOrders.")
+    except Exception as e:
+        print(f"❌ Error Koneksi DB Pesanan: {e}")
+
+# --- TAMBAHKAN MODEL INI DI BAWAH KUMPULAN CLASS MODEL LAINNYA ---
+class SellerScrapeRequest(BaseModel):
+    start_date: str
+    end_date: str
+
+# --- ENDPOINT 5: SCRAPE PESANAN SELLER (JALUR EXCEL) ---
+@app.post("/api/scrape-seller-orders")
+def run_seller_scraper(req: SellerScrapeRequest):
+    print(f"\n🚀 [API] Memulai Penarikan Laporan dari {req.start_date} sampai {req.end_date}...")
+    
+    # Teruskan parameter tanggal ke engine Playwright
+    data_pesanan = get_seller_orders(req.start_date, req.end_date)
+    
+    if data_pesanan:
+        save_orders_to_db(data_pesanan)
+        return {"message": "Berhasil menarik laporan.", "total_pesanan": len(data_pesanan), "results": data_pesanan}
+    else:
+        return {"message": "Tidak ada data pesanan baru atau file gagal diunduh.", "total_pesanan": 0, "results": []}
+
 
 if __name__ == "__main__":
     import uvicorn
